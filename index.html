@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>給愛麗絲：四個視角</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500&family=IBM+Plex+Mono:ital,wght@0,300;0,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0b18;--text:#ccc8d4;--dim:#504d64;--soft:#7a7690;
+  --alice:#b89fd0;--cat:#7ab4a6;--rabbit:#c4906a;--hatter:#7878b0;
+  --rc:#b89fd0;
+  --serif:'Noto Serif TC',serif;--mono:'IBM Plex Mono',monospace;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--serif);font-weight:300;line-height:2;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.5}
+.prog{position:fixed;top:0;left:0;height:1px;background:var(--rc);transition:width 0.9s,background 0.6s;z-index:100}
+.edge{position:fixed;left:0;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,transparent 10%,rgba(192,58,82,0.15) 50%,transparent 90%);z-index:5;transition:background 2s}
+.edge.heal{background:linear-gradient(to bottom,transparent 10%,rgba(var(--rc-r),0.1) 50%,transparent 90%)}
+.wrap{position:relative;z-index:10;max-width:620px;margin:0 auto;padding:80px 44px 160px}
+
+/* ── CARD DRAW ─────────────────────────────────── */
+.stage{text-align:center;padding:20px 0;min-height:88vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px}
+.stage-note{font-family:var(--mono);font-size:11px;color:var(--dim);border:1px solid rgba(255,255,255,0.05);padding:12px 16px;margin-bottom:4px;line-height:1.85;text-align:left;max-width:360px}
+.stage-note a{color:var(--rc);text-decoration:none;transition:color 0.5s}
+.stage-lbl{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:0.25em;text-transform:uppercase}
+.stage-title{font-size:clamp(18px,3vw,26px);font-weight:500;letter-spacing:0.08em;line-height:1.6;color:var(--text)}
+.card-wrap{perspective:1000px;width:148px;height:228px;cursor:pointer;margin:4px auto}
+.card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 1s cubic-bezier(0.23,1,0.32,1)}
+.card-wrap:hover .card-inner:not(.flipped){transform:translateY(-5px) rotateY(16deg) rotateX(4deg)}
+.card-inner.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 16px;gap:10px}
+.card-back{background:#141222;border:1px solid rgba(255,255,255,0.06);overflow:hidden;transition:border-color 0.28s,box-shadow 0.28s}
+.card-wrap:hover .card-inner:not(.flipped) .card-back{border-color:rgba(var(--rc-r),0.34);box-shadow:0 18px 42px rgba(0,0,0,0.28),0 0 26px rgba(var(--rc-r),0.08)}
+.card-back::after{content:'';position:absolute;inset:-20%;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,0.08) 50%,transparent 65%);transform:translateX(-90%);transition:transform 0.7s cubic-bezier(0.23,1,0.32,1);pointer-events:none}
+.card-wrap:hover .card-inner:not(.flipped) .card-back::after{transform:translateX(90%)}
+.cb-crack{width:1px;height:60px;background:linear-gradient(to bottom,transparent,rgba(255,255,255,0.06),transparent);margin:0 auto}
+.cb-q{font-size:26px;color:rgba(255,255,255,0.05);font-family:var(--mono)}
+.card-front{transform:rotateY(180deg);background:#110f20;border:2px solid var(--rc);transition:border-color 0.5s}
+.cf-sym{font-size:20px;letter-spacing:0.2em;color:var(--rc);transition:color 0.5s;font-family:var(--mono)}
+.cf-name{font-size:19px;font-weight:500;letter-spacing:0.12em;color:var(--rc);transition:color 0.5s}
+.cf-line{width:20px;height:1px;background:var(--rc);opacity:0.4;transition:background 0.5s}
+.cf-desc{font-size:11px;color:rgba(202,198,210,0.45);text-align:center;line-height:1.7;font-style:italic}
+.hint{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:0.15em;transition:opacity 0.3s}
+.card-info{opacity:0;transition:opacity 0.9s;text-align:center;max-width:320px}
+.card-info.show{opacity:1}
+.ci-tag{font-family:var(--mono);font-size:10px;letter-spacing:0.15em;color:var(--rc);display:block;margin-bottom:8px;text-transform:uppercase;transition:color 0.5s}
+.ci-note{font-size:13px;color:rgba(202,198,210,0.5);line-height:1.8;font-style:italic}
+.go-btn{background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(202,198,210,0.5);padding:10px 28px;font-family:var(--mono);font-size:10px;letter-spacing:0.15em;cursor:pointer;transition:all 0.2s;display:none}
+.go-btn:hover{border-color:var(--rc);color:var(--rc)}
+.go-btn.show{display:inline-block}
+
+/* ── STORY ──────────────────────────────────────── */
+.sect{display:none;opacity:0;transform:translateY(14px);transition:opacity 0.9s,transform 0.9s;margin-bottom:56px}
+.sect.vis{opacity:1;transform:translateY(0)}
+.chh{display:flex;align-items:center;gap:14px;margin-bottom:40px}
+.sect .chh{opacity:0;transform:translateY(6px);transition:opacity 0.85s ease,transform 0.85s ease}
+.sect .chh.shown{opacity:1;transform:translateY(0)}
+.chn{font-family:var(--mono);font-size:10px;color:rgba(202,198,210,0.22);letter-spacing:0.2em}
+.cht{font-size:12px;color:var(--dim);letter-spacing:0.1em}
+.chr{flex:1;height:1px;background:rgba(255,255,255,0.05)}
+.sect .prose p{opacity:0;transform:translateY(5px);transition:opacity 0.78s ease,transform 0.78s ease}
+.sect .prose p.li{opacity:1;transform:translateY(0)}
+.prose p{margin-bottom:1.5em;font-size:15px;line-height:2}
+.prose p.s{line-height:1.45;margin-bottom:0.45em}
+.prose p.em{color:rgba(202,198,210,0.8);font-size:16px;text-align:center;margin:24px 0;letter-spacing:0.06em}
+#twboss{font-size:32px;line-height:1.55;margin:34px 0;color:rgba(235,232,242,0.92);text-shadow:0 0 18px rgba(var(--rc-r),0.18)}
+.wall{font-size:14.5px;color:#c49468;font-style:italic;padding:5px 0 5px 18px;border-left:2px solid rgba(196,148,104,0.2);margin:18px 0;line-height:1.85;animation:breathe 5s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:1}55%{opacity:0.75}}
+.air{margin:28px 0;padding:16px 0;border-top:1px solid rgba(196,148,104,0.07);border-bottom:1px solid rgba(196,148,104,0.07);text-align:center}
+.air p{font-size:13px;color:rgba(196,148,104,0.5);font-style:italic;margin-bottom:0.4em;line-height:1.7;opacity:0;transition:opacity 0.7s}
+.air p.in{opacity:1}
+.comp{font-size:14px;padding:9px 18px;border-left:2px solid rgba(122,180,166,0.2);margin:18px 0;font-style:italic;line-height:1.85;color:rgba(122,180,166,0.75)}
+.dream{margin:28px 0 8px;padding:16px 0;border-top:1px solid rgba(255,255,255,0.055);border-bottom:1px solid rgba(255,255,255,0.055);opacity:0;transition:opacity 0.7s}
+.dream.show{opacity:1}
+.dream-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.dream-title{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:0.16em}
+.dream-count{font-family:var(--mono);font-size:9px;color:rgba(202,198,210,0.28);letter-spacing:0.12em;white-space:nowrap}
+.dream-rule{font-family:var(--mono);font-size:9px;color:rgba(202,198,210,0.24);letter-spacing:0.08em;margin:-4px 0 12px;line-height:1.7}
+.dream-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.dream-btn{min-height:68px;border:1px solid rgba(255,255,255,0.065);background:rgba(255,255,255,0.012);color:rgba(202,198,210,0.48);font-family:var(--serif);font-size:13px;line-height:1.55;cursor:pointer;transition:border-color 0.25s,background 0.25s,color 0.25s,transform 0.2s;text-align:left;padding:12px}
+.dream-btn:hover,.dream-btn:focus{outline:none;border-color:var(--rc);background:rgba(255,255,255,0.03);color:var(--text);transform:translateY(-1px)}
+.dream-btn.seen{border-color:rgba(var(--rc-r),0.28);color:rgba(202,198,210,0.72)}
+.dream.echoed .dream-title{color:var(--rc)}
+.dream.echoed .dream-rule{color:rgba(var(--rc-r),0.58)}
+.dream-result{display:none;margin-top:12px;padding:12px 16px;border-left:2px solid var(--rc);background:rgba(255,255,255,0.018);font-size:13.5px;color:rgba(202,198,210,0.56);line-height:1.85;font-style:italic}
+.dream-result strong{display:block;font-family:var(--mono);font-size:9px;letter-spacing:0.14em;color:var(--rc);font-style:normal;font-weight:400;margin-bottom:5px}
+.hud{position:fixed;right:18px;bottom:18px;z-index:120;width:178px;border:1px solid rgba(255,255,255,0.06);background:rgba(17,16,31,0.76);backdrop-filter:blur(10px);padding:12px 13px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity 0.45s,transform 0.45s,border-color 0.3s}
+.hud.show{opacity:1;transform:translateY(0);pointer-events:auto}
+.hud-role{font-family:var(--mono);font-size:9px;color:var(--rc);letter-spacing:0.14em;margin-bottom:7px}
+.hud-line{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:9px;color:rgba(202,198,210,0.34);letter-spacing:0.06em;line-height:1.8}
+.hud-line strong{color:rgba(202,198,210,0.72);font-weight:400}
+.audio-toggle{position:fixed;right:18px;top:18px;z-index:180;min-width:112px;padding:10px 13px;border:1px solid rgba(255,255,255,0.14);background:rgba(17,16,31,0.86);backdrop-filter:blur(12px);color:rgba(202,198,210,0.78);font-family:var(--mono);font-size:11px;letter-spacing:0.08em;cursor:pointer;opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity 0.3s,transform 0.3s,border-color 0.2s,color 0.2s,background 0.2s}
+.audio-toggle.show{opacity:1;transform:translateY(0);pointer-events:auto}
+.audio-toggle:hover,.audio-toggle:focus{outline:none;border-color:var(--rc);color:var(--rc);background:rgba(17,16,31,0.94)}
+.audio-toggle.off{color:rgba(202,198,210,0.48);border-color:rgba(255,255,255,0.08)}
+.trace{margin:30px 0 24px;padding:18px 0;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06)}
+.trace-title{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:0.18em;margin-bottom:14px}
+.trace-list{display:grid;gap:8px}
+.trace-item{font-size:13px;line-height:1.75;color:rgba(202,198,210,0.5);border-left:2px solid rgba(var(--rc-r),0.22);padding:8px 12px;background:rgba(255,255,255,0.014)}
+.trace-item.echo{border-left-color:rgba(196,144,106,0.45);background:rgba(196,144,106,0.035)}
+.trace-item b{color:var(--rc);font-weight:400}
+.trace-path{font-size:14px;color:rgba(202,198,210,0.72);line-height:1.85;margin-top:14px}
+
+/* typewriter */
+.twc{display:inline-block;animation:bl 0.7s step-end infinite;color:var(--rc)}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+
+/* inner voice */
+.iv{margin:22px 0;padding:13px 18px 13px 20px;border-left:2px solid var(--rc);background:rgba(255,255,255,0.018);font-style:italic;font-size:14px;color:rgba(202,198,210,0.58);line-height:1.9;opacity:0;transition:opacity 0.9s,border-color 0.5s;transition-delay:0.2s}
+.iv.show{opacity:1}
+.iv-lbl{display:block;font-family:var(--mono);font-size:9px;letter-spacing:0.2em;color:var(--rc);margin-bottom:5px;font-style:normal;opacity:0.75;transition:color 0.5s}
+
+/* choices */
+.cnode{margin:32px 0 0;opacity:0;transition:opacity 0.7s}
+.cnode.show{opacity:1}
+.cq{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:0.12em;margin-bottom:16px}
+.cbtn-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cbtn{border:1px solid rgba(255,255,255,0.07);padding:16px 18px;cursor:pointer;transition:border-color 0.25s,background 0.25s,transform 0.2s;font-size:13.5px;line-height:1.8;color:rgba(202,198,210,0.44);background:transparent;font-family:var(--serif);text-align:left;width:100%;position:relative;overflow:hidden}
+.cbtn:hover{border-color:var(--rc);background:rgba(255,255,255,0.02);transform:translateY(-2px);color:var(--text)}
+.cbtn .note{display:block;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;margin-top:6px;font-style:normal}
+.cbtn .truth,.cbtn .lie{transition:opacity 0.34s,filter 0.34s,letter-spacing 0.34s}
+.cbtn .lie{display:none}
+.cbtn.dream-shift{border-color:rgba(var(--rc-r),0.16);animation:choiceDrift 2.8s ease-in-out infinite}
+.cbtn.dream-shift::before{content:"";position:absolute;left:14px;right:14px;bottom:16px;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--rc-r),0.52),transparent);opacity:0.34;transform:scaleX(0.18);transform-origin:left;animation:lineUnease 2.6s ease-in-out infinite;pointer-events:none}
+.cbtn.dream-shift::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(var(--rc-r),0.13),transparent);transform:translateX(-120%);transition:transform 0.8s;pointer-events:none}
+.cbtn.dream-shift:hover::after,.cbtn.dream-shift:focus::after,.cbtn.dream-shift.revealed::after{transform:translateX(120%)}
+.cbtn.dream-shift:hover .truth,.cbtn.dream-shift:focus .truth,.cbtn.dream-shift.revealed .truth{display:none}
+.cbtn.dream-shift:hover .lie,.cbtn.dream-shift:focus .lie,.cbtn.dream-shift.revealed .lie{display:inline}
+.cbtn.dream-shift .note{animation:noteUnease 2.9s ease-in-out infinite}
+@keyframes choiceDrift{0%,100%{filter:none;letter-spacing:0}44%{filter:blur(0.18px);letter-spacing:0.018em}48%{transform:translateY(-1px)}52%{transform:translateY(0)}}
+@keyframes lineUnease{0%,100%{opacity:0.08;transform:scaleX(0.12) translateX(0)}45%{opacity:0.44;transform:scaleX(0.78) translateX(8%)}70%{opacity:0.18;transform:scaleX(0.32) translateX(55%)}}
+@keyframes noteUnease{0%,100%{opacity:0.62;letter-spacing:0.08em}50%{opacity:0.38;letter-spacing:0.14em}}
+.choice-echo{display:none;margin-top:14px;padding:12px 18px;border-left:2px solid var(--rc);font-size:13.5px;color:rgba(202,198,210,0.45);font-style:italic;transition:border-color 0.5s}
+.choice-echo.lied{background:linear-gradient(90deg,rgba(138,66,82,0.14),transparent)}
+.choice-echo .echo-tag{display:block;font-family:var(--mono);font-size:9px;color:var(--rc);letter-spacing:0.1em;margin-bottom:5px;font-style:normal;transition:color 0.5s}
+.choice-echo .echo-lie{display:block;color:rgba(238,235,243,0.74)}
+.choice-echo .echo-truth{display:block;margin-top:7px;color:rgba(202,198,210,0.34);font-size:12px}
+.real{font-size:14.5px;color:var(--rc);margin:28px 0;padding:16px 22px;border:1px solid rgba(var(--rc-r),0.1);background:rgba(255,255,255,0.02);line-height:1.95;font-style:italic;transition:color 0.5s,border-color 0.5s}
+.solo{display:none;margin:30px 0;border:1px solid rgba(255,255,255,0.07);background:#100f1d;opacity:0;transform:translateY(8px);transition:opacity 0.7s,transform 0.7s,border-color 0.3s;overflow:hidden}
+.solo.show{display:block;opacity:1;transform:translateY(0)}
+.solo-stage{position:relative;min-height:260px;background:#0f0e1a center/cover no-repeat;display:flex;align-items:flex-end;padding:18px}
+.solo-stage::before{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(12,11,24,0.18),rgba(12,11,24,0.86));z-index:1}
+.solo-stage::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 75% 18%,rgba(var(--rc-r),0.18),transparent 34%);z-index:2;pointer-events:none}
+.solo-portrait{position:absolute;right:6px;bottom:0;max-height:86%;max-width:48%;object-fit:contain;z-index:5;opacity:0.9;filter:drop-shadow(0 18px 28px rgba(0,0,0,0.45))}
+.solo-dialogue{position:relative;z-index:4;width:min(58%,390px);padding:16px 18px;background:linear-gradient(90deg,rgba(14,13,26,0.82),rgba(14,13,26,0.48));border-left:2px solid var(--rc);backdrop-filter:blur(6px);box-shadow:18px 0 34px rgba(14,13,26,0.18)}
+.solo-kicker{font-family:var(--mono);font-size:9px;color:var(--rc);letter-spacing:0.16em;margin-bottom:7px}
+.solo-line{font-size:14.5px;line-height:1.85;color:rgba(235,232,242,0.78);font-style:italic;min-height:4.8em}
+.solo-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-top:1px solid rgba(255,255,255,0.055)}
+.solo-count{font-family:var(--mono);font-size:9px;color:rgba(202,198,210,0.32);letter-spacing:0.12em}
+.solo-btn{padding:8px 14px;background:transparent;border:1px solid rgba(255,255,255,0.08);color:rgba(202,198,210,0.46);font-family:var(--mono);font-size:9px;letter-spacing:0.12em;cursor:pointer;transition:border-color 0.2s,color 0.2s}
+.solo-btn:hover{border-color:var(--rc);color:var(--rc)}
+.solo-btn:disabled{cursor:default}
+.sep{text-align:center;color:var(--dim);font-size:11px;letter-spacing:0.35em;margin:32px 0;opacity:0.22}
+.nav{margin-top:28px}
+.nav-btn{background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(202,198,210,0.5);padding:9px 24px;font-family:var(--mono);font-size:10px;letter-spacing:0.14em;cursor:pointer;transition:all 0.2s}
+.nav-btn:hover{border-color:var(--rc);color:var(--rc)}
+
+/* ── REACTION OVERLAY ──────────────────────────── */
+.rx-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.35s}
+.rx-overlay.open{opacity:1;pointer-events:auto}
+.rx-panel{width:100%;max-width:620px;background:#131120;border-top:1px solid rgba(255,255,255,0.07);padding:24px 28px 30px;transform:translateY(100%);transition:transform 0.45s cubic-bezier(0.23,1,0.32,1)}
+.rx-overlay.open .rx-panel{transform:translateY(0)}
+.rx-title{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:0.2em;display:block;margin-bottom:6px}
+.rx-sub{font-size:12.5px;color:rgba(202,198,210,0.38);font-style:italic;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.05);line-height:1.7}
+.rx-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.rx-grid.consequence{grid-template-columns:1fr}
+.rx-cell{padding:13px 15px;border:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.01);opacity:0;transform:translateY(6px);transition:opacity 0.4s,transform 0.4s}
+.rx-cell.in{opacity:1;transform:translateY(0)}
+.rx-cell.is-you{border-color:var(--rc);background:rgba(255,255,255,0.03)}
+.rx-cell.consequence{border-color:rgba(var(--rc-r),0.18);background:rgba(255,255,255,0.018)}
+.rx-role{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;margin-bottom:6px}
+.rx-cell.rc-alice .rx-role{color:var(--alice)}
+.rx-cell.rc-cat .rx-role{color:var(--cat)}
+.rx-cell.rc-rabbit .rx-role{color:var(--rabbit)}
+.rx-cell.rc-hatter .rx-role{color:var(--hatter)}
+.rx-text{font-size:12.5px;color:rgba(202,198,210,0.48);font-style:italic;line-height:1.75}
+.rx-cell.is-you .rx-text{color:rgba(202,198,210,0.82)}
+.you-pill{display:inline-block;font-family:var(--mono);font-size:8px;letter-spacing:0.12em;color:var(--rc);border:1px solid rgba(255,255,255,0.1);padding:2px 6px;margin-top:6px;transition:color 0.5s}
+.rx-close{width:100%;padding:10px;background:transparent;border:1px solid rgba(255,255,255,0.07);color:rgba(202,198,210,0.45);font-family:var(--mono);font-size:10px;letter-spacing:0.15em;cursor:pointer;transition:all 0.2s}
+.rx-close:hover{border-color:var(--rc);color:var(--rc)}
+
+/* ── DREAM INTERRUPT ────────────────────────────── */
+.dm-overlay{position:fixed;inset:0;background:rgba(12,11,24,0.72);z-index:650;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity 0.28s}
+.dm-overlay.open{opacity:1;pointer-events:auto}
+.dm-box{width:min(420px,100%);border:1px solid rgba(255,255,255,0.08);background:#11101f;padding:24px 24px 22px;box-shadow:0 22px 80px rgba(0,0,0,0.38);transform:translateY(8px) scale(0.98);transition:transform 0.34s cubic-bezier(0.23,1,0.32,1),border-color 0.3s}
+.dm-overlay.open .dm-box{transform:translateY(0) scale(1)}
+.dm-box.warn{border-color:rgba(196,144,106,0.34)}
+.dm-box.find{border-color:rgba(var(--rc-r),0.36)}
+.dm-kicker{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.18em;margin-bottom:10px}
+.dm-title{font-size:18px;line-height:1.55;color:var(--text);font-weight:400;margin-bottom:12px}
+.dm-body{font-size:14px;line-height:1.9;color:rgba(202,198,210,0.62);font-style:italic;margin-bottom:20px}
+.dm-btn{width:100%;padding:11px;background:transparent;border:1px solid rgba(255,255,255,0.09);color:rgba(202,198,210,0.52);font-family:var(--mono);font-size:10px;letter-spacing:0.14em;cursor:pointer;transition:border-color 0.2s,color 0.2s,background 0.2s}
+.dm-btn:hover{border-color:var(--rc);color:var(--rc);background:rgba(255,255,255,0.02)}
+.dream-jolt{animation:jolt 0.35s ease}
+@keyframes jolt{0%,100%{filter:none}35%{filter:contrast(1.25) saturate(0.8);transform:translateX(-2px)}65%{filter:contrast(1.08);transform:translateX(2px)}}
+
+/* ── REVEAL ──────────────────────────────────────── */
+.reveal{display:none;opacity:0;transition:opacity 1s;margin-bottom:60px}
+.reveal.show{opacity:1}
+.reveal-prose p{font-size:15px;line-height:2;margin-bottom:1.5em}
+.reveal-prose p.s{line-height:1.45;margin-bottom:0.45em}
+.finale{text-align:center;margin:44px 0 24px;opacity:0;transition:opacity 2.2s}
+.finale.show{opacity:1}
+.finale p{font-size:14px;color:rgba(202,198,210,0.35);line-height:2.4;min-height:1.4em}
+.verdict{text-align:center;margin:0 0 32px;font-size:14px;color:rgba(202,198,210,0.45);line-height:2}
+.verdict strong{display:block;font-size:19px;font-weight:500;color:var(--rc);letter-spacing:0.08em;margin-bottom:8px;transition:color 0.5s}
+.final-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:28px 0}
+.fc-cell{padding:16px;border:1px solid rgba(255,255,255,0.05);opacity:0;transform:translateY(8px);transition:opacity 0.6s,transform 0.6s}
+.fc-cell.in{opacity:1;transform:translateY(0)}
+.fc-cell.is-you{border-color:var(--rc)}
+.fc-role{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;margin-bottom:8px}
+.fc-cell.rc-alice .fc-role{color:var(--alice)}
+.fc-cell.rc-cat .fc-role{color:var(--cat)}
+.fc-cell.rc-rabbit .fc-role{color:var(--rabbit)}
+.fc-cell.rc-hatter .fc-role{color:var(--hatter)}
+.fc-text{font-size:13px;color:rgba(202,198,210,0.5);font-style:italic;line-height:1.8}
+.fc-cell.is-you .fc-text{color:rgba(202,198,210,0.8)}
+.resource{margin-top:44px;padding:18px 20px;border-top:1px solid rgba(255,255,255,0.06);font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.9}
+.resource a{color:var(--rc);text-decoration:none;transition:color 0.5s}
+.replay-btn{display:block;width:100%;padding:11px;background:transparent;border:1px solid rgba(255,255,255,0.07);color:var(--dim);font-family:var(--mono);font-size:10px;letter-spacing:0.15em;cursor:pointer;margin-top:28px;transition:all 0.2s;text-align:center}
+.replay-btn:hover{border-color:var(--rc);color:var(--rc)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-3px)}40%{transform:translateX(3px)}60%{transform:translateX(-2px)}80%{transform:translateX(2px)}}
+.fd{opacity:0;transition:opacity 0.7s}
+
+@media(max-width:540px){
+  .wrap{padding:60px 20px 100px}
+  .cbtn-row,.rx-grid,.final-grid,.dream-grid{grid-template-columns:1fr}
+  .hud{left:20px;right:20px;bottom:12px;width:auto}
+  .solo-stage{min-height:300px;padding:14px}
+  .solo-portrait{max-height:64%;max-width:48%;opacity:0.82}
+  .solo-dialogue{width:58%;min-width:0;padding:13px 14px;background:linear-gradient(90deg,rgba(14,13,26,0.84),rgba(14,13,26,0.42))}
+  .solo-line{font-size:13.5px;line-height:1.75;min-height:5.2em}
+  .stage-title{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="edge" id="edge"></div>
+<div class="prog" id="prog"></div>
+<button class="audio-toggle" id="audioBtn" type="button" aria-label="音樂開關">音樂：開</button>
+<div class="hud" id="hud" aria-hidden="true">
+  <div class="hud-role" id="hudRole">// 視角</div>
+  <div class="hud-line"><span>觸碰</span><strong id="hudMarks">0</strong></div>
+  <div class="hud-line"><span>回聲</span><strong id="hudEchoes">0</strong></div>
+  <div class="hud-line"><span>偏向</span><strong id="hudPath">未定</strong></div>
+  <div class="hud-line"><span>污染</span><strong id="hudLie">0</strong></div>
+</div>
+
+<!-- ── REACTION OVERLAY ──────────────────────────── -->
+<div class="rx-overlay" id="rxO">
+  <div class="rx-panel">
+    <span class="rx-title">// 同一個瞬間，四個人心裡</span>
+    <p class="rx-sub" id="rxSub"></p>
+    <div class="rx-grid" id="rxGrid"></div>
+    <button class="rx-close" id="rxClose">我知道了，繼續 →</button>
+  </div>
+</div>
+
+<!-- ── DREAM INTERRUPT ───────────────────────────── -->
+<div class="dm-overlay" id="dmO" aria-hidden="true">
+  <div class="dm-box" id="dmBox">
+    <div class="dm-kicker" id="dmKicker">// 夢境插話</div>
+    <h2 class="dm-title" id="dmTitle"></h2>
+    <p class="dm-body" id="dmBody"></p>
+    <button class="dm-btn" id="dmClose">我聽見了</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ── 抽牌 ──────────────────────────────────────── -->
+<div class="stage" id="stage">
+  <div class="stage-note">
+    本故事涉及關係中的操控與心理暴力。<br>
+    文中有底線的詞語懸停後顯示說明。<br>
+    台灣保護專線：<a href="tel:113" id="stage-link">113</a>（24小時）
+  </div>
+  <div>
+    <p class="stage-lbl">給愛麗絲 · 四個視角</p>
+    <h1 class="stage-title" style="margin-top:12px">同一個夢，<br>四個人在不同的地方。</h1>
+  </div>
+  <div>
+    <div class="card-wrap" onclick="flipCard()">
+      <div class="card-inner" id="cInner">
+        <div class="card-face card-back">
+          <div class="cb-q">?</div>
+          <div class="cb-crack"></div>
+        </div>
+        <div class="card-face card-front" id="cFront">
+          <div class="cf-sym" id="cSym"></div>
+          <div class="cf-name" id="cName"></div>
+          <div class="cf-line"></div>
+          <div class="cf-desc" id="cDesc"></div>
+        </div>
+      </div>
+    </div>
+    <p class="hint" id="hint">點擊翻牌</p>
+  </div>
+  <div class="card-info" id="cInfo">
+    <span class="ci-tag" id="ciTag"></span>
+    <p class="ci-note" id="ciNote"></p>
+  </div>
+  <button class="go-btn" id="goBtn" onclick="enterStory()">進入夢境 →</button>
+</div>
+
+<!-- ── 序章 ──────────────────────────────────────── -->
+<div class="sect" id="s0">
+  <div class="chh"><span class="chn">序章</span><span class="cht">裂縫</span><div class="chr"></div></div>
+  <div class="prose">
+    <p class="s">房間沒有聲音。</p>
+    <p class="s">不是安靜——是聲音被壓住了。</p>
+    <p>&nbsp;</p>
+    <p class="s">燈光閃了一下。</p>
+    <p class="s">牆壁像在呼吸。</p>
+    <p>&nbsp;</p>
+    <p class="s">地板中央，有一道裂縫。</p>
+    <p>&nbsp;</p>
+    <p class="s" id="tw0a" style="min-height:1.5em"></p>
+    <p class="s" id="tw0b" style="min-height:1.5em"></p>
+  </div>
+  <div class="iv" id="iv0"><span class="iv-lbl" id="ivl0"></span><span id="ivt0"></span></div>
+  <div class="solo" id="solo-s0"></div>
+  <div class="dream" id="dream-s0"></div>
+  <div class="nav"><button class="nav-btn" onclick="nxt('s1')">繼續 →</button></div>
+</div>
+
+<!-- ── 第一章：牆上的字 ──────────────────────────── -->
+<div class="sect" id="s1">
+  <div class="chh"><span class="chn">第一章</span><span class="cht">牆上的字</span><div class="chr"></div></div>
+  <div class="prose">
+    <p class="s">房間看起來很正常。桌子。椅子。窗戶。</p>
+    <p class="s">只是——影子不對。門的位置在不注意時改變。</p>
+    <p>&nbsp;</p>
+    <p class="s">牆上出現了字。</p>
+  </div>
+  <div class="wall fd" id="w1"></div>
+  <div class="prose fd" id="pw2"><p class="s">回頭看。字變了。</p></div>
+  <div class="wall fd" id="w2"></div>
+  <div class="prose fd" id="pw3"><p class="s">再看一次。</p></div>
+  <div class="wall fd" id="w3"></div>
+  <div class="air fd" id="air1">
+    <p>「他其實沒有那麼壞。」</p>
+    <p>「只是有時候失控。」</p>
+    <p>「妳知道他愛妳的。」</p>
+  </div>
+  <div class="prose fd" id="pq">
+    <p class="s">有人問：</p>
+    <p class="em">「這裡——安全嗎？」</p>
+    <p class="s">沒有立刻回答。</p>
+    <p class="s">鬆開了門把。</p>
+  </div>
+  <div class="iv fd" id="iv1"><span class="iv-lbl" id="ivl1"></span><span id="ivt1"></span></div>
+  <div class="solo fd" id="solo-s1"></div>
+  <div class="dream fd" id="dream-s1"></div>
+  <div class="cnode fd" id="c1">
+    <p class="cq" id="c1q"></p>
+    <div class="cbtn-row" id="c1btns"></div>
+    <div class="choice-echo" id="ce1"><span class="echo-tag" id="ce1tag"></span><span id="ce1txt"></span></div>
+  </div>
+</div>
+
+<!-- ── 第二章：兔子的時間 ─────────────────────────── -->
+<div class="sect" id="s2">
+  <div class="chh"><span class="chn">第二章</span><span class="cht">兔子的時間</span><div class="chr"></div></div>
+  <div class="prose">
+    <p class="s">門打開了。走廊很普通，太普通了。</p>
+    <p class="s">廚房。客廳。門口。然後又是廚房。</p>
+    <p>&nbsp;</p>
+    <p class="s">時間開始不對。秒針有的快，有的停。</p>
+  </div>
+  <div class="air" id="air2">
+    <p>「妳怎麼還沒好？」</p>
+    <p>「我等很久了。」</p>
+    <p>「快一點。」</p>
+  </div>
+  <div class="prose">
+    <p class="s">越跑越快。越快越錯。越錯越跑。</p>
+  </div>
+  <div class="iv" id="iv2"><span class="iv-lbl" id="ivl2"></span><span id="ivt2"></span></div>
+  <div class="solo" id="solo-s2"></div>
+  <div class="dream" id="dream-s2"></div>
+  <div class="cnode" id="c2">
+    <p class="cq" id="c2q"></p>
+    <div class="cbtn-row" id="c2btns"></div>
+    <div class="choice-echo" id="ce2"><span class="echo-tag" id="ce2tag"></span><span id="ce2txt"></span></div>
+  </div>
+</div>
+
+<!-- ── 第三章：茶會 ──────────────────────────────── -->
+<div class="sect" id="s3">
+  <div class="chh"><span class="chn">第三章</span><span class="cht">帽子先生的茶會</span><div class="chr"></div></div>
+  <div class="prose">
+    <p class="s">花園在前面。桌子已經擺好了。茶還是熱的。</p>
+    <p>&nbsp;</p>
+    <p class="s">對面有個人。</p>
+    <p class="s">但每看一次，他就變一次。</p>
+    <p class="s">帽子。沒有帽子。年輕的臉。熟悉的臉。</p>
+    <p>&nbsp;</p>
+    <p class="s">聲音再次出現：</p>
+  </div>
+  <div class="wall">
+    <p>「是不是妳想太多了？」</p>
+    <p>「我沒有那個意思。」</p>
+    <p>「妳記錯了。」</p>
+  </div>
+  <div class="prose">
+    <p class="s">我的手，摸了摸自己的手臂。還是溫的。</p>
+  </div>
+  <div class="iv" id="iv3"><span class="iv-lbl" id="ivl3"></span><span id="ivt3"></span></div>
+  <div class="solo" id="solo-s3"></div>
+  <div class="dream" id="dream-s3"></div>
+  <div class="cnode" id="c3">
+    <p class="cq" id="c3q"></p>
+    <div class="cbtn-row" id="c3btns"></div>
+    <div class="choice-echo" id="ce3"><span class="echo-tag" id="ce3tag"></span><span id="ce3txt"></span></div>
+  </div>
+</div>
+
+<!-- ── 第四章：最終對決 ──────────────────────────── -->
+<div class="sect" id="s4">
+  <div class="chh"><span class="chn">第四章</span><span class="cht">最終對決</span><div class="chr"></div></div>
+  <div class="prose">
+    <p class="s">王座在前面。</p>
+    <p class="s">她坐在那裡。溫柔。安靜。</p>
+    <p>&nbsp;</p>
+    <p class="s">她退下去了之後——</p>
+    <p class="s">只剩下一個人。他看著愛麗絲。</p>
+  </div>
+  <div class="prose" style="margin:0">
+    <p class="em" id="twboss" style="min-height:1.6em"></p>
+  </div>
+  <div class="prose fd" id="pbossafter">
+    <p class="s">她停住了。很久。</p>
+    <p class="s">這句話太熟悉了。它的形狀，剛好是那個空掉的地方的形狀。</p>
+  </div>
+  <div class="iv fd" id="iv4"><span class="iv-lbl" id="ivl4"></span><span id="ivt4"></span></div>
+  <div class="dream fd" id="dream-s4"></div>
+  <div class="cnode fd" id="c4">
+    <p class="cq" id="c4q"></p>
+    <div class="cbtn-row" id="c4btns"></div>
+    <div class="choice-echo" id="ce4"><span class="echo-tag" id="ce4tag"></span><span id="ce4txt"></span></div>
+  </div>
+</div>
+
+<!-- ── 結尾 ───────────────────────────────────────── -->
+<div class="reveal" id="reveal">
+  <div class="chh"><span class="chn">結尾</span><span class="cht">安靜</span><div class="chr"></div></div>
+  <div class="reveal-prose">
+    <p class="s" id="twend" style="min-height:1.5em"></p>
+    <p>&nbsp;</p>
+    <p class="s" id="endingBody1"></p>
+    <p>&nbsp;</p>
+    <p class="s" id="endingBody2"></p>
+    <p class="s" id="endingBody3"></p>
+    <p class="s" id="endingBody4"></p>
+  </div>
+  <div class="sep">· · ·</div>
+  <div class="reveal-prose">
+    <p class="s" id="endingCoda1"></p>
+    <p class="s" id="endingCoda2"></p>
+  </div>
+  <div class="finale" id="fin">
+    <p id="tf1" style="min-height:1.4em"></p>
+    <p id="tf2" style="min-height:1.4em"></p>
+    <p>&nbsp;</p>
+    <p id="tf3" style="min-height:1.4em"></p>
+  </div>
+  <div class="sep">· · ·</div>
+  <div style="opacity:0;transition:opacity 0.8s" id="finalWrap">
+    <p style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:0.18em;margin-bottom:18px">// 那一刻，四個人</p>
+    <div class="final-grid" id="finalGrid"></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="trace" id="traceBox"></div>
+    <div class="resource">
+      如果你在這個故事裡認出了什麼——<br>
+      你的感知是真實的。你沒有記錯。你不是太敏感。<br><br>
+      你不是一個人。<br><br>
+      <strong style="font-weight:400;color:var(--rc)">台灣保護專線：<a href="tel:113">113</a></strong>（24小時，免費）
+    </div>
+    <button class="replay-btn" onclick="location.reload()">重新抽牌，換個視角</button>
+  </div>
+</div>
+
+</div><!-- .wrap -->
+<script>
+/* ═══════════════════════════════════════════════
+   ROLE DATA
+═══════════════════════════════════════════════ */
+var ROLES=['愛麗絲','貓','兔子','帽子先生'];
+var CLS={'愛麗絲':'rc-alice','貓':'rc-cat','兔子':'rc-rabbit','帽子先生':'rc-hatter'};
+var COLORS={'愛麗絲':'#b89fd0','貓':'#7ab4a6','兔子':'#c4906a','帽子先生':'#7878b0'};
+var SYMS={'愛麗絲':'◈','貓':'◉','兔子':'◆','帽子先生':'◇'};
+var DESCS={
+  '愛麗絲':'你在夢的正中心。',
+  '貓':'你跟著她走。有幾個瞬間，你選擇了沉默。',
+  '兔子':'你一直在催。你從來沒問過，她為什麼要跟著你跑。',
+  '帽子先生':'你看見了一切。你用改變形狀來迴避開口說話。'
+};
+var NOTES={
+  '愛麗絲':'一切都從你的感知開始，也從你的感知結束。',
+  '貓':'你的沉默，有時候比說話更重。',
+  '兔子':'你的催促，是一種你從來沒反問過自己的本能。',
+  '帽子先生':'每一次改變形狀，都是一次你選擇不說話的瞬間。'
+};
+
+/* inner voices */
+var IV={
+  s0:{
+    '愛麗絲':'我站在門口，手還放在門把上。我不知道自己是剛走進來，還是一直都在這裡。',
+    '貓':'我在裂縫旁邊等著。我知道她今天會來。我每次都知道。',
+    '兔子':'還沒開始，就已經感覺要遲到了。我說不清楚遲到什麼。只是，一直要跑。',
+    '帽子先生':'我的臉還沒決定要變成什麼。這個房間，我來過很多次了。'
+  },
+  s1:{
+    '愛麗絲':'牆上的字換了三次。每一次都更輕、更柔、更像說得通的樣子。',
+    '貓':'我聽見那些字從牆上滲出來。沒有一句讓我覺得不對——這才是最讓我不安的地方。',
+    '兔子':'文字。我不讀文字，我只是跑。但那一句「妳只是太敏感」讓我的腳步慢了一下。',
+    '帽子先生':'「妳只是太敏感。」我讀了這句話，我的臉換了一次。那是我在不知道怎麼辦時唯一會做的事。'
+  },
+  s2:{
+    '愛麗絲':'聲音從四面八方來。時間縮短了。我開始跑，越跑越快，越快越錯。',
+    '貓':'我跟著跑。我告訴自己跟著比落後要好。但我跑著跑著，忘記了我原本想說的話。',
+    '兔子':'這才是我最自在的地方——所有人都在跑，所有事都要現在，所有時間都是我的時間。',
+    '帽子先生':'我在前面的花園等著。我知道她遲早會跑到這裡來。我只需要等。'
+  },
+  s3:{
+    '愛麗絲':'他每看一次就變一次。那些字從不同方向飄來：「妳記錯了。」「我沒有那個意思。」我的手抖了一下。',
+    '貓':'帽子先生一直在變。我看著他，想：他是不是也不知道怎麼停下來面對？',
+    '兔子':'有人說「妳記錯了」。這句話讓時間又開始動了。我繼續往前跑。',
+    '帽子先生':'我一直在變，是因為每換一次形狀，就不需要說話一次。但說不出口的東西一直在這裡。'
+  },
+  s4:{
+    '愛麗絲':'那句話太熟悉了。它的形狀，剛好是我空掉的地方的形狀。我幾乎——幾乎又相信了。',
+    '貓':'「我都是為妳好。」我聽見這句話了。我也說過。用不同的方式說過。',
+    '兔子':'「為你好」，所以要更快，要更順從，要——等等，我說的是誰？',
+    '帽子先生':'這句話，我見過太多次了。它很重。它的重量，我從來沒有說出來過。'
+  }
+};
+
+/* dream objects: small discoveries that make each role feel different */
+var EXPLORE={
+  s0:[
+    {id:'crack',label:'摸裂縫',mark:'序章／裂縫',axis:'witness',text:{
+      '愛麗絲':'裂縫是溫的。像一個被壓住很久的句子，終於開始發燙。',
+      '貓':'裂縫旁邊有我的腳印。原來我不是第一次來，也不是第一次假裝沒看見。',
+      '兔子':'裂縫裡傳來滴答聲。不是鐘，是我自己的心跳在催促。',
+      '帽子先生':'裂縫照出我的臉。它沒有變。這反而讓我害怕。'}},
+    {id:'knob',label:'轉門把',mark:'序章／門把',axis:'face',text:{
+      '愛麗絲':'門把轉得動，但門沒有開。它像在問：妳真的要出去，還是只是想被允許？',
+      '貓':'門把上有抓痕。有人曾經想出去，也有人曾經把門重新關上。',
+      '兔子':'門後沒有走廊，只有另一個時鐘。它慢了三分鐘，像在故意違抗我。',
+      '帽子先生':'門把沾著茶香。我想起自己曾經站在這裡，說「再等等」。'}},
+    {id:'lamp',label:'看燈影',mark:'序章／燈影',axis:'avoid',text:{
+      '愛麗絲':'影子比我先退了一步。它知道哪裡危險，但它不會替我說話。',
+      '貓':'燈影裡有一雙眼睛。不是盯著她，是盯著我什麼時候開口。',
+      '兔子':'光一閃，我看見自己跑過房間三次。每一次都沒有看她。',
+      '帽子先生':'燈影把我切成好幾個形狀。每一個都比真正的我容易解釋。'}}
+  ],
+  s1:[
+    {id:'wall',label:'刮牆字',mark:'第一章／牆字',axis:'face',text:{
+      '愛麗絲':'字刮掉後，底下還有一句：「妳當時真的很害怕。」',
+      '貓':'我用指甲刮牆。刮下來的不是灰，是我吞回去的話。',
+      '兔子':'牆字卡住了我的腳步。原來有些句子會比路障更重。',
+      '帽子先生':'牆字掉下來，露出我的筆跡。我曾經也把那句話寫上去。'}},
+    {id:'window',label:'貼近窗戶',mark:'第一章／窗戶',axis:'witness',text:{
+      '愛麗絲':'窗外不是外面。窗外是一個旁觀的人，正在練習把視線移開。',
+      '貓':'玻璃映出我微笑的臉。那笑容太熟練了，熟練到不像我的。',
+      '兔子':'窗外的路一直往前。我鬆了一口氣，然後立刻為這口氣感到羞愧。',
+      '帽子先生':'窗戶反光裡，我沒有帽子。沒有角色時，我不知道該站在哪裡。'}},
+    {id:'chair',label:'坐上椅子',mark:'第一章／椅子',axis:'submit',text:{
+      '愛麗絲':'椅子很舒服。舒服到讓人想忘記自己本來只是暫時坐下。',
+      '貓':'椅背在耳邊說：「不要破壞氣氛。」我差點點頭。',
+      '兔子':'椅子困住了我一秒。那一秒裡，世界沒有壞掉。',
+      '帽子先生':'椅子替我保持形狀。這比我自己保持容易多了。'}}
+  ],
+  s2:[
+    {id:'clock',label:'停下秒針',mark:'第二章／秒針',axis:'face',text:{
+      '愛麗絲':'秒針停下來後，房間反而開始聽得見我的呼吸。',
+      '貓':'我按住秒針。它掙扎得像一個被訓練過的藉口。',
+      '兔子':'秒針停了。我沒有死。世界也沒有死。這件事很可怕。',
+      '帽子先生':'秒針一停，茶香回來了。等待不再像懲罰。'}},
+    {id:'shoe',label:'撿起鞋帶',mark:'第二章／鞋帶',axis:'witness',text:{
+      '愛麗絲':'鞋帶鬆了很久。原來我一直跌倒，不是因為我笨。',
+      '貓':'我看見她的鞋帶。這一次，我沒有只看見她跑得慢。',
+      '兔子':'鞋帶讓我想起：不是每個人都能用我的速度活著。',
+      '帽子先生':'鞋帶綁成結，也能解開。不是所有糾纏都叫命運。'}},
+    {id:'hall',label:'回頭看走廊',mark:'第二章／走廊',axis:'avoid',text:{
+      '愛麗絲':'走廊在身後折起來。它不想讓我知道我走了多遠。',
+      '貓':'走廊上都是我跟過去的影子。每一道都離她半步。',
+      '兔子':'回頭的瞬間，我看見她一直在追我，而不是追出口。',
+      '帽子先生':'走廊像一條長桌。每個座位都有人等著假裝沒事。'}}
+  ],
+  s3:[
+    {id:'cup',label:'聞茶杯',mark:'第三章／茶杯',axis:'submit',text:{
+      '愛麗絲':'茶聞起來像道歉。甜得剛好，剛好遮住底下的苦。',
+      '貓':'茶杯邊緣有我的唇印。我也喝過這種讓人安靜的東西。',
+      '兔子':'茶讓時間變慢。我不喜歡，卻差點睡著。',
+      '帽子先生':'這杯茶是我泡的。我放了太多糖，因為真話太苦。'}},
+    {id:'mirror',label:'掀開鏡子',mark:'第三章／鏡子',axis:'face',text:{
+      '愛麗絲':'鏡子裡的人沒有哭。她只是很努力，不讓別人說她太誇張。',
+      '貓':'鏡子裡的我張開嘴。現實裡的我慢了一拍，但跟上了。',
+      '兔子':'鏡子裡沒有路，只有一張被我催到喘不過氣的臉。',
+      '帽子先生':'鏡子沒有反射我的帽子。它只反射我躲在帽子下面的眼睛。'}},
+    {id:'spoon',label:'敲湯匙',mark:'第三章／湯匙',axis:'witness',text:{
+      '愛麗絲':'湯匙敲出一聲很小的響。小到不能傷人，大到不能假裝沒聽見。',
+      '貓':'那聲響讓整桌停了一下。原來打斷也可以不用很大聲。',
+      '兔子':'響聲切開時間。這次不是催促，是提醒。',
+      '帽子先生':'湯匙聲像句號。我突然知道，有些話該在這裡結束。'}}
+  ],
+  s4:[
+    {id:'crown',label:'碰王冠',mark:'第四章／王冠',axis:'avoid',text:{
+      '愛麗絲':'王冠很輕。輕到讓人明白，權力有時候不需要重量。',
+      '貓':'王冠裡沒有頭。只有一圈被大家同意的沉默。',
+      '兔子':'王冠轉了一圈，像時鐘。但它沒有時間，只有命令。',
+      '帽子先生':'我戴過那頂王冠。只要戴上它，就不用承認自己害怕。'}},
+    {id:'hand',label:'看自己的手',mark:'第四章／手',axis:'face',text:{
+      '愛麗絲':'我的手還在。它沒有替我原諒任何人，也沒有替我否認任何事。',
+      '貓':'她看著自己的手。我也看著我的。原來我還能做些什麼。',
+      '兔子':'手停下來比腳更難。停下來之後，我才知道自己一直握得多緊。',
+      '帽子先生':'我的手沒有消失。這代表我還在場，還要負責。'}},
+    {id:'exit',label:'找出口',mark:'第四章／出口',axis:'witness',text:{
+      '愛麗絲':'出口不是門。出口是那一句終於沒有被吞下去的話。',
+      '貓':'出口在她身後，也在我喉嚨裡。兩邊都需要被打開。',
+      '兔子':'出口不在前方。這讓我很不習慣。',
+      '帽子先生':'出口沒有等我變成更好的人。它只等我不要再消失。'}}
+  ]
+};
+
+var DREAM_INTERRUPTS={
+  start:{
+    tone:'warn',
+    kicker:'// 進入前告知',
+    title:'這個夢不會懲罰你選錯。',
+    body:'有些選項會讓房間變重，有些會讓裂縫變亮。你可以慢慢碰觸物件，也可以直接往前走。夢會記得兩種方式。',
+    button:'進入'
+  },
+  firstTouch:{
+    tone:'find',
+    kicker:'// 夢境已記錄',
+    title:'你碰到的東西，會跟著你到結尾。',
+    body:'每個物件都不是道具，而是一段被藏起來的證詞。不同視角會讀出不同的意思。',
+    button:'繼續摸索'
+  },
+  s0:{
+    tone:'find',
+    kicker:'// 隱藏回聲',
+    title:'裂縫開始回答你。',
+    body:'你不是只是在看故事。你正在替這個房間建立證據。剛才碰過的兩樣東西，已經改變了結尾的語氣。',
+    button:'把回聲收起來',
+    mark:'隱藏回聲／裂縫',
+    text:'你在序章停留得夠久，裂縫不再只是背景，而成了第一個證人。'
+  },
+  s1:{
+    tone:'warn',
+    kicker:'// 牆面警示',
+    title:'有些句子會偽裝成安慰。',
+    body:'「不要多想」有時不是安慰，而是要求你停止相信自己的感覺。牆字正在測試你會不會把它當成真理。',
+    button:'我會記得',
+    mark:'隱藏回聲／牆面',
+    text:'你看見安慰如何變成命令，也看見命令如何偽裝成關心。'
+  },
+  s2:{
+    tone:'warn',
+    kicker:'// 時間警示',
+    title:'催促會讓人以為沒有選擇。',
+    body:'當所有東西都在倒數，人會忘記停下來也是行動。秒針不是出口，它只是聲音比較大。',
+    button:'讓秒針小聲一點',
+    mark:'隱藏回聲／時間',
+    text:'你發現速度本身也能成為牢籠，越急越像服從。'
+  },
+  s3:{
+    tone:'find',
+    kicker:'// 茶會告知',
+    title:'記憶不需要完美，才有資格被相信。',
+    body:'夢會故意問你細節，像是在審問。可是害怕的感覺、退縮的身體、說不出口的停頓，本來也是記憶。',
+    button:'保留這段記憶',
+    mark:'隱藏回聲／茶會',
+    text:'你沒有把記憶修剪成別人比較能接受的形狀。'
+  },
+  s4:{
+    tone:'warn',
+    kicker:'// 最終警示',
+    title:'「為你好」不能取消你的感受。',
+    body:'如果一句話要求你放棄自己的感覺，這句話就不只是理由。它正在試著替你決定你痛不痛。',
+    button:'不要讓它替我決定',
+    mark:'隱藏回聲／王座',
+    text:'你在最後的房間辨認出熟悉的句型，也辨認出它不等於愛。'
+  }
+};
+
+var SOLO_LINES={
+  '愛麗絲':{
+    section:'s0',
+    title:'愛麗絲單人線／裂縫房間',
+    bg:'bg_inner.png',
+    portrait:'global/alice_idle_front.png',
+    music:'music/ch1_bg_inner.mp3',
+    mark:'單人線／愛麗絲',
+    trace:'你在裂縫房間多待了一會兒。愛麗絲開始分辨：害怕不是錯，害怕是一種資訊。',
+    beats:[
+      '我把手放在裂縫旁邊。它沒有割傷我，只是很冷。',
+      '牆壁說：「妳可以裝作沒看到。」可是我的手已經知道它在這裡。',
+      '如果我現在離開，門也會跟著我走。不是出口，是另一個房間。',
+      '所以我先不走。我先承認：這裡真的裂開了。'
+    ]
+  },
+  '貓':{
+    section:'s1',
+    title:'貓單人線／走廊旁觀',
+    bg:'bg_corridor.png',
+    portrait:'ui_cat_big.png',
+    music:'music/ch1_bg.mp3',
+    mark:'單人線／貓',
+    trace:'你讓貓在走廊裡停下來。旁觀不再只是安全距離，而是一種需要被選擇的立場。',
+    beats:[
+      '我坐在走廊盡頭。這裡離所有事都剛剛好，不會太近，也不會太遠。',
+      '她看向我時，我差點又笑了。笑是一種門，可以把話關在門後。',
+      '牆上的字說她太敏感。我知道那不完全是真的。',
+      '我第一次想：如果我知道，卻什麼都不說，那我到底站在哪一邊？'
+    ]
+  },
+  '兔子':{
+    section:'s2',
+    title:'兔子單人線／時間廚房',
+    bg:'ch2_rabbit/ui_kitchen_bg_rabbit.png',
+    portrait:'ui_rabbit_big.png',
+    music:'music/ch2_bg.mp3',
+    mark:'單人線／兔子',
+    trace:'你進入時間廚房。催促不再只是背景音，而變成一個可以被質疑的房間。',
+    beats:[
+      '廚房裡所有東西都在響。水壺、烤箱、牆上的鐘，連抽屜都在倒數。',
+      '「快一點。」我聽見自己說。可是這句話不是從嘴巴出來，是從整個房間出來。',
+      '盤子排成隊，像等著被檢查。我開始檢查她，也檢查我自己。',
+      '我突然不知道，我到底是在趕時間，還是在用時間趕走她的聲音。'
+    ]
+  },
+  '帽子先生':{
+    section:'s3',
+    title:'帽子先生單人線／茶會背面',
+    bg:'ch3_hatter/bg_ch3_teaparty_distorted.png',
+    portrait:'ui_hatter_big.png',
+    music:'music/ch3_bg_hatter.mp3',
+    mark:'單人線／帽子先生',
+    trace:'你看見茶會背面。帽子先生的變形不是魔法，而是每一次避開真話的後遺症。',
+    beats:[
+      '桌上有四個杯子，沒有一個是乾淨的。每個杯緣都有我說到一半的話。',
+      '我換了一頂帽子。大家就能假裝剛才那句話不是我說的。',
+      '茶壺裡倒出來的不是茶，是「我沒有那個意思」。它很燙，燙到沒有人敢碰。',
+      '我把帽子放下。這次不換了。這張臉可能不好看，但至少是同一張。'
+    ]
+  }
+};
+
+/* choices: each role has a different question + 2 options */
+var CHOICES={
+  c1:{
+    '愛麗絲':{q:'// 牆說「妳只是太敏感」。我要怎麼對待自己的感覺？',
+      a:{text:'我替那句話找理由，告訴自己也許真的是我太敏感。',note:'感覺被放回牆裡。'},
+      b:{text:'我把手按在裂縫上，先承認我真的害怕。',note:'不是反抗，只是暫時不否認。'}},
+    '貓':{q:'// 愛麗絲看向我。牆上的字還在。我——',
+      a:{text:'我低下頭，讓那句話自己變成答案。',note:'沉默會被她讀成同意。'},
+      b:{text:'我說：「我也看見了。妳不是在幻想。」',note:'聲音很小，但它站在她那邊。'}},
+    '兔子':{q:'// 她在門口慢了下來。我的懷錶開始發燙。我——',
+      a:{text:'我敲了敲錶面：「快一點，妳又慢了。」',note:'房間跟著我一起催促。'},
+      b:{text:'我把懷錶蓋上：「等一下，先讓她呼吸。」',note:'這是兔子第一次讓時間停下。'}},
+    '帽子先生':{q:'// 牆字落下來。愛麗絲等著有人確認現實。我——',
+      a:{text:'我換了一張更好看的臉，假裝沒看懂。',note:'變形讓現實失焦。'},
+      b:{text:'我保持同一張臉，說：「那句話不公平。」',note:'穩定本身就是證詞。'}}
+  },
+  c2:{
+    '愛麗絲':{q:'// 走廊一直重複。時間像在追我。我——',
+      a:{text:'我跑得更快，證明自己沒有拖累任何人。',note:'越快越不像自己的速度。'},
+      b:{text:'我停下來數自己的呼吸，讓身體先回來。',note:'停下也是一種行動。'}},
+    '貓':{q:'// 愛麗絲跑過我身邊。她沒有看路，只看著兔子。我——',
+      a:{text:'我跟著跑，至少看起來像沒有背叛任何人。',note:'陪跑不等於陪伴。'},
+      b:{text:'我停在原地，對她伸出手：「妳可以慢一點。」',note:'她第一次看見另一種節奏。'}},
+    '兔子':{q:'// 時間廚房裡所有東西一起響。我讓聲音——',
+      a:{text:'我把所有鐘都轉快，讓她不敢停下。',note:'催促變成整個房間的規則。'},
+      b:{text:'我關掉最大的那個鐘，問自己：她為什麼要追著我？',note:'規則出現了裂縫。'}},
+    '帽子先生':{q:'// 花園就在前面。她快跑到茶會了。我——',
+      a:{text:'我繼續坐著等，讓她自己撞進來。',note:'等待有時也是推她一把。'},
+      b:{text:'我離開座位，往走廊走去接她。',note:'我不再只在終點等她崩潰。'}}
+  },
+  c3:{
+    '愛麗絲':{q:'// 茶會說：「妳記錯了。」我怎麼保存那段記憶？',
+      a:{text:'我把記憶修剪得比較合理，讓它不再惹人討厭。',note:'痛感被改寫成禮貌。'},
+      b:{text:'我留下那個不完整的畫面，連害怕一起留下。',note:'記憶不必完美才是真的。'}},
+    '貓':{q:'// 帽子先生說她記錯了。我也在場。我——',
+      a:{text:'我看著茶杯，不看她。這樣比較不需要負責。',note:'不作證，就是讓她獨自被審問。'},
+      b:{text:'我說：「我記得。她沒有編出來。」',note:'旁觀者終於變成證人。'}},
+    '兔子':{q:'// 茶會停住。所有人都在等我把時間往前推。我——',
+      a:{text:'我敲響懷錶：「下一件事，快點。」',note:'被跳過的記憶會留在原地發霉。'},
+      b:{text:'我把懷錶放在桌上：「這件事先不要跳過。」',note:'時間第一次替記憶停留。'}},
+    '帽子先生':{q:'// 我知道她沒有記錯。可是我的臉又開始變。我——',
+      a:{text:'我換成另一張臉，讓剛才的話沒有主人。',note:'沒有主人，錯就找不到地方落下。'},
+      b:{text:'我用同一張臉說：「她沒有記錯，是我說謊。」',note:'真話讓我的形狀固定下來。'}}
+  },
+  c4:{
+    '愛麗絲':{q:'// 「我都是為妳好。」這句話靠近我。我——',
+      a:{text:'我把它收下，因為被愛應該就是這樣吧。',note:'熟悉的痛被叫成關心。'},
+      b:{text:'我退後一步，說：「那不是愛。」',note:'這一次，我沒有替它改名。'}},
+    '貓':{q:'// 他說「為妳好」。愛麗絲的眼神開始退回去。我——',
+      a:{text:'我維持微笑，讓場面看起來還能被收拾。',note:'她把我的微笑看成世界同意了他。'},
+      b:{text:'我站到她旁邊：「這不是為她好。」',note:'她終於不是一個人面對那句話。'}},
+    '兔子':{q:'// 那句話讓所有鐘停了一秒。我——',
+      a:{text:'我重新上緊發條，逼時間繼續跑。',note:'只要夠快，就不用聽見她痛。'},
+      b:{text:'我把懷錶放下，轉身看著愛麗絲。',note:'時間不再替那句話催眠她。'}},
+    '帽子先生':{q:'// 最後一張臉也開始裂開。我——',
+      a:{text:'我消失在帽沿下面，讓她自己判斷。',note:'缺席也是一種後果。'},
+      b:{text:'我留在原地，用同一張臉陪她看完。',note:'現實終於沒有再變形。'}}
+  }
+};
+
+var DREAM_LIES={
+  c1:{
+    a:{lie:'「妳只是太敏感。先承認妳錯了，事情就會安靜。」',trace:'第一個選項在指尖底下改口。它把懷疑包成安慰，讓愛麗絲以為退讓也是理解。'},
+    b:{lie:'「我相信妳，可是妳最好不要說太大聲。」',trace:'支持的句子被夢壓低了音量。它還站在她身邊，但開始害怕被聽見。'}
+  },
+  c2:{
+    a:{lie:'「快一點。只要妳跟上，大家就不會失望。」',trace:'時間替選項加上催促。兔子的鐘把照顧翻成命令。'},
+    b:{lie:'「停下來可以，但只能一下下。不要讓別人等太久。」',trace:'暫停被夢縮短成許可。它不是休息，只是另一種倒數。'}
+  },
+  c3:{
+    a:{lie:'「那就忘掉吧。忘掉的人比較容易被喜歡。」',trace:'茶杯把記憶泡淡。選項看起來溫柔，其實正在訓練她失去證詞。'},
+    b:{lie:'「記住也可以，但不要拿它麻煩任何人。」',trace:'真相被折成很小一張紙。它還在，只是被要求不能割傷誰。'}
+  },
+  c4:{
+    a:{lie:'「我知道。你是為我好。這樣就不痛了。」',trace:'最後的順從替自己穿上了愛的外衣。夢境幾乎成功讓它聽起來像自由。'},
+    b:{lie:'「那不是……算了。也許你真的是為我好。」',trace:'反抗的句子被夢咬掉一半。剩下的沉默，比原本的選項更重。'}
+  }
+};
+
+var DREAM_REREADS={
+  s0:'第二次碰到它時，物件沒有回答。它只是把剛才那句話用更輕的聲音重複了一遍，像在確認你會不會假裝沒聽見。',
+  s1:'你回頭再看，牆上的字少了一筆。少掉的地方，剛好是最像「不是我的錯」的那一筆。',
+  s2:'同一個東西第二次變得更像鐘。不是因為它真的在走，是因為你開始替它倒數。',
+  s3:'茶水表面浮出另一行字，又立刻沉下去。你只看清楚一件事：忘記也是被教會的。',
+  s4:'它第二次沒有讓你靠近。裂縫從物件背後看著你，好像在等你承認你早就知道。'
+};
+
+/* role consequence data: what your role did, and what Alice carries from it */
+var CONSEQUENCES={
+  '愛麗絲':{
+    c1a:{sub:'你把牆上的話收進身體裡。',act:'你替「太敏感」找了理由。',alice:'愛麗絲把自己的害怕放小，像把一張紙摺到可以藏進袖口。'},
+    c1b:{sub:'你沒有立刻否認自己的感覺。',act:'你承認那道裂縫是真的。',alice:'愛麗絲沒有變勇敢，但她第一次沒有把害怕交給別人解釋。'},
+    c2a:{sub:'你用速度證明自己沒有錯。',act:'你跑得更快，直到呼吸跟不上身體。',alice:'愛麗絲開始相信，慢下來就是拖累所有人。'},
+    c2b:{sub:'你停下來，讓身體先回來。',act:'你數自己的呼吸，沒有追著走廊跑。',alice:'愛麗絲發現世界沒有因為她停下來就立刻崩塌。'},
+    c3a:{sub:'你替記憶修邊。',act:'你把痛改寫得比較合理、比較不冒犯人。',alice:'愛麗絲的記憶變得容易被接受，也更難保護她自己。'},
+    c3b:{sub:'你保留了不完整的真相。',act:'你讓害怕、空白、發抖都留在記憶裡。',alice:'愛麗絲知道自己不需要拿出完美證據，才有資格相信自己。'},
+    c4a:{sub:'你把「為妳好」收下了。',act:'你把熟悉的痛重新命名成關心。',alice:'愛麗絲又往夢裡退了一步，因為這個名字聽起來太像愛。'},
+    c4b:{sub:'你拒絕替那句話改名。',act:'你說：「那不是愛。」',alice:'愛麗絲聽見自己的聲音沒有碎掉。房間第一次安靜得像出口。'}
+  },
+  '貓':{
+    c1a:{sub:'你的沉默被愛麗絲讀懂了。',act:'你低下頭，沒有替她確認現實。',alice:'愛麗絲把你的沉默當成答案：也許真的只有她覺得不對。'},
+    c1b:{sub:'你把旁觀變成證詞。',act:'你說：「我也看見了。」',alice:'愛麗絲沒有立刻相信自己，但她知道至少有一雙眼睛沒有背叛她。'},
+    c2a:{sub:'你跟著跑，卻沒有陪到她。',act:'你選擇看起來安全的隊伍。',alice:'愛麗絲看見你在身邊，卻感覺你離她更遠。'},
+    c2b:{sub:'你給了她另一種節奏。',act:'你停下來，伸手讓她可以慢一點。',alice:'愛麗絲第一次覺得，停下不是被丟下，而是有人在等。'},
+    c3a:{sub:'你沒有作證。',act:'你看著茶杯，不看她。',alice:'愛麗絲開始在腦中審問自己，因為在場的人沒有替她說話。'},
+    c3b:{sub:'你成為證人。',act:'你說你記得。',alice:'愛麗絲的記憶不再只困在她一個人的身體裡。'},
+    c4a:{sub:'你維持了場面。',act:'你微笑，讓一切看起來還可以被收拾。',alice:'愛麗絲把你的微笑看成世界同意了他。'},
+    c4b:{sub:'你站到她旁邊。',act:'你說：「這不是為她好。」',alice:'愛麗絲聽見那句話被外面的人拒絕，於是她也比較能拒絕。'}
+  },
+  '兔子':{
+    c1a:{sub:'你讓房間跟著催促。',act:'你敲錶，說她又慢了。',alice:'愛麗絲把害怕吞下去，因為比起害怕，慢好像更不可原諒。'},
+    c1b:{sub:'你讓時間第一次停下。',act:'你蓋上懷錶，讓她呼吸。',alice:'愛麗絲看見時間不是永遠站在別人那邊。'},
+    c2a:{sub:'你把催促變成規則。',act:'你轉快所有鐘。',alice:'愛麗絲開始用你的速度判斷自己的價值。'},
+    c2b:{sub:'你質疑了自己的規則。',act:'你關掉最大的鐘。',alice:'愛麗絲聽見一段空白。那段空白裡，她還是存在。'},
+    c3a:{sub:'你跳過了記憶。',act:'你敲錶，要所有人進入下一件事。',alice:'愛麗絲的記憶被留在桌上，像一杯沒有人承認的冷茶。'},
+    c3b:{sub:'你替記憶停留。',act:'你把懷錶放在桌上。',alice:'愛麗絲知道有些事可以慢慢說，不必在倒數裡證明自己。'},
+    c4a:{sub:'你重新上緊發條。',act:'你逼時間繼續跑。',alice:'愛麗絲差點又被速度帶走，來不及分辨那句話是不是愛。'},
+    c4b:{sub:'你停止替那句話催眠她。',act:'你放下懷錶，看著她。',alice:'愛麗絲終於不是追著你跑，而是站在自己的時間裡。'}
+  },
+  '帽子先生':{
+    c1a:{sub:'你讓現實失焦。',act:'你換了一張更好看的臉。',alice:'愛麗絲看見你的臉變了，也開始懷疑是不是自己的感覺變錯。'},
+    c1b:{sub:'你讓現實穩了一下。',act:'你保持同一張臉，說那句話不公平。',alice:'愛麗絲靠著你的穩定，短暫看清牆上那句話的形狀。'},
+    c2a:{sub:'你在終點等她崩潰。',act:'你沒有離開茶席。',alice:'愛麗絲跑向你準備好的桌子，像跑進另一個被安排好的答案。'},
+    c2b:{sub:'你離開了自己的座位。',act:'你往走廊走去接她。',alice:'愛麗絲看見有人願意改變位置，而不是只要求她抵達。'},
+    c3a:{sub:'你讓話沒有主人。',act:'你又換了一張臉。',alice:'愛麗絲找不到該對誰生氣，於是又把錯往自己身上收。'},
+    c3b:{sub:'你把真話固定住。',act:'你承認她沒有記錯，是你說謊。',alice:'愛麗絲看見現實可以停止變形，哪怕只有一句話的時間。'},
+    c4a:{sub:'你缺席了。',act:'你躲進帽沿下面，讓她自己判斷。',alice:'愛麗絲面對那句話時少了一個錨，世界又開始晃。'},
+    c4b:{sub:'你留下來。',act:'你用同一張臉陪她看完。',alice:'愛麗絲看見現實沒有再逃走，於是她也能站穩一點。'}
+  }
+};
+
+/* reaction data */
+var RX={
+  c1a:{sub:'那句話——「妳只是太敏感。」——落在地板上了。沒有人拾起來。',
+    '愛麗絲':'我說了是。房間安靜了。那道裂縫還在，但我選擇不再低頭看它。',
+    '貓':'我沒有說話。那句話就這樣落著，沒有人撿起來。我告訴自己：也許是真的。',
+    '兔子':'我繼續跑。我以為讓她動著就是保護她。',
+    '帽子先生':'我換了一個形狀。這樣比較不需要面對那句話的重量。'},
+  c1b:{sub:'有人停了下來。',
+    '愛麗絲':'我沒有立刻回答。那個停頓，是我第一次給自己的空間。',
+    '貓':'我說了些話。聲音很小，但說了。我不確定有沒有人聽見。',
+    '兔子':'她的臉，我才第一次真正看見。',
+    '帽子先生':'我保持著這個形狀。這是我能給她的最穩定的東西。'},
+  c2a:{sub:'跑，更快，一直跑。',
+    '愛麗絲':'越跑越快，越快越錯，越錯越跑。',
+    '貓':'我跟著跑。跑著跑著，我忘記了我原本想說的話。',
+    '兔子':'她跟著跑了。這讓我覺得一切都在正常運行。',
+    '帽子先生':'我在花園等著。茶是涼的，但我繼續等。'},
+  c2b:{sub:'有人停了下來。',
+    '愛麗絲':'世界愣住了。那是我第一次感覺到自己的重量，而不是速度。',
+    '貓':'她停了，我也停了。我沒想到停下來也可以是一種選擇。',
+    '兔子':'她停了。我怔了一下。原來她可以停的。那我一直在催什麼？',
+    '帽子先生':'她走進花園了。茶，還是熱的。'},
+  c3a:{sub:'「妳記錯了。」這句話，沒有被反駁。',
+    '愛麗絲':'我開始在腦海裡修改那些記憶。把邊角削掉，把顏色換掉，讓它變得比較輕。',
+    '貓':'我告訴自己：也許她真的記錯了。這樣想，比較不需要做任何事。',
+    '兔子':'我繼續往前跑。有些事不去想就不存在了。',
+    '帽子先生':'我換了一個形狀，跳過了這一刻。但說不出口的東西沒有因此消失。'},
+  c3b:{sub:'「我沒有記錯。」',
+    '愛麗絲':'世界震動了一下。是我說話讓它震動的，不是什麼別的。',
+    '貓':'我說了：我記得那件事。我不知道算不算太晚了，但我說了。',
+    '兔子':'有些事需要被記住。就算記住了會痛，也需要。',
+    '帽子先生':'我的臉，第一次沒有改變。說出真話讓我的形狀穩定了一下。'},
+  c4a:{sub:'那句話，沒有被反駁。',
+    '愛麗絲':'我說了我知道。那三個字出來的時候比我以為的還要輕鬆。但鬆開的感覺，沒有來。',
+    '貓':'我繼續微笑。但我聽見了自己的沉默，比任何話都更清晰。',
+    '兔子':'我繼續跑。這樣就不需要面對剛才說的那句話。',
+    '帽子先生':'我消失了。但有個什麼東西，比消失更重，留了下來。'},
+  c4b:{sub:'「那不是愛。」',
+    '愛麗絲':'世界崩塌了。沒有爆炸，沒有光。只有安靜。',
+    '貓':'我說了：這不對。我一直知道。我一直沒說。今天，我說了。',
+    '兔子':'我停下來了。轉頭看她。真正看她，不是在催她。',
+    '帽子先生':'我留了下來，穩住了自己的形狀。這是我能給她的東西。'}
+};
+
+/* final state per role & ending */
+var FINAL_AWAKE={
+  '愛麗絲':'裂縫還在。但不再擴大了。我知道我的手是我的手。',
+  '貓':'我說出口了。我不知道夠不夠，但我說了。',
+  '兔子':'我停下來了。我在想：我一直在跑的那個東西，到底是什麼？',
+  '帽子先生':'我的形狀穩定了。這是我第一次選擇留下來，而不是變成別的東西。'
+};
+var FINAL_HEAVY={
+  '愛麗絲':'裂縫繼續擴大。我選擇不再低頭看它——但我知道它在那裡。',
+  '貓':'我繼續微笑。但我聽見了自己的沉默，比任何話都更清晰。',
+  '兔子':'我繼續跑。但我知道，我一直都可以停下來的。',
+  '帽子先生':'我消失了。但有個什麼東西，比消失更重，留了下來。'
+};
+var FINAL_BELIEVE={
+  '愛麗絲':'我把那句「為妳好」收下。它不再像刀，因為我學會把刀叫成關心。',
+  '貓':'我沒有再看她。只要不看見，就可以相信事情還沒有壞到需要出聲。',
+  '兔子':'我重新上緊發條。時間替我把那句話磨平，磨到它聽起來像規則。',
+  '帽子先生':'我換了一張溫柔的臉。溫柔到沒有人能指出它哪裡不對。'
+};
+var FINAL_ENGULF={
+  '愛麗絲':'裂縫終於張開。它沒有咬我，它只是用一個很像家的聲音叫我回去。',
+  '貓':'我聽見夢合上。那聲音很輕，像一次大家都同意的沉默。',
+  '兔子':'所有鐘一起響。不是提醒，是宣判。她再也不需要慢下來，因為夢替她停止了。',
+  '帽子先生':'我的形狀碎成很多片。每一片都說：這不是我的錯。'
+};
+
+/* verdicts */
+var VERDICTS={
+  '愛麗絲':{aw:'第一次，不需要有人告訴你該怎麼做。',hv:'那道裂縫，你知道它在哪裡。它一直在那裡。',bl:'你相信了那句話，於是夢暫時停止攻擊你。這不是安全，只是順從。',eg:'裂縫沒有消失。它只是變成房間本身。'},
+  '貓':{aw:'說出口之後，你才知道你一直都知道。',hv:'沉默也是一種選擇。你帶著這個重量繼續往下走。',bl:'你讓場面維持完整，也讓她更難相信自己破碎。',eg:'你沒有推她進去，但你也沒有伸手。夢記得這個差別。'},
+  '兔子':{aw:'停下來是你從來沒試過的事。你試了。',hv:'你還在跑。但有一個問題，開始在你心裡動了。',bl:'時間又開始替那句話服務。她跟上了，所以看起來沒事。',eg:'所有催促都抵達了同一個終點：她再也不用選。'},
+  '帽子先生':{aw:'這個形狀，你決定讓它留著。',hv:'你消失了，但有什麼東西比消失更重，留了下來。',bl:'你把逃避裝成溫柔。她相信了那張臉。',eg:'當現實一直變形，最後被吞掉的不是夢，是辨認現實的能力。'}
+};
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+var myRole=ROLES[Math.floor(Math.random()*ROLES.length)];
+var myColor=COLORS[myRole];
+var myClass=CLS[myRole];
+var flipped=false;
+var rxCB=null;
+var awakening=0; // count of awakening choices
+var badChoices=0;
+var finalChoicePath=null;
+var dreamMarks=[];
+var dreamSeen={};
+var dreamRereadSeen={};
+var hiddenEchoSeen={};
+var interruptSeen={};
+var modalQueue=[];
+var modalOpen=false;
+var soloSeen={};
+var AUDIO_FILES={bgm:'music/system.mp3',click:'sound/click_e.mp3'};
+var musicEnabled=true;
+var audioEnabled=true;
+var backgroundMusic=null;
+var currentBgm=null;
+var liePressure=0;
+var corruptedChoices=0;
+var pathScore={submit:0,witness:0,avoid:0,face:0};
+
+document.documentElement.style.setProperty('--rc',myColor);
+document.documentElement.style.setProperty('--rc-r',hr(myColor));
+
+/* ═══════════════════════════════════════════════
+   CARD DRAW
+═══════════════════════════════════════════════ */
+function flipCard(){
+  if(flipped)return; flipped=true;
+  document.getElementById('audioBtn').classList.add('show');
+  playClickSound();
+  startBackgroundMusic();
+  var cf=document.getElementById('cFront');
+  cf.style.borderColor=myColor;
+  document.getElementById('cSym').textContent=SYMS[myRole];
+  document.getElementById('cSym').style.color=myColor;
+  document.getElementById('cName').textContent=myRole;
+  document.getElementById('cName').style.color=myColor;
+  document.getElementById('cDesc').textContent=DESCS[myRole];
+  document.getElementById('cInner').classList.add('flipped');
+  document.getElementById('hint').style.opacity='0';
+  document.getElementById('stage-link').style.color=myColor;
+  setTimeout(function(){
+    var ci=document.getElementById('cInfo');
+    ci.classList.add('show');
+    document.getElementById('ciTag').textContent=myRole+' '+SYMS[myRole];
+    document.getElementById('ciTag').style.color=myColor;
+    document.getElementById('ciNote').textContent=NOTES[myRole];
+    setTimeout(function(){
+      var gb=document.getElementById('goBtn');
+      gb.style.borderColor='rgba('+hr(myColor)+',0.28)';
+      gb.style.color=myColor;
+      gb.classList.add('show');
+    },600);
+  },850);
+}
+
+function enterStory(){
+  playClickSound();
+  var st=document.getElementById('stage');
+  st.style.transition='opacity 0.7s'; st.style.opacity='0';
+  setTimeout(function(){
+    st.style.display='none';
+    showHud();
+    dreamInterrupt('start');
+    showSect('s0');
+    setProg(0.1);
+  },750);
+}
+
+/* ═══════════════════════════════════════════════
+   SECTIONS
+═══════════════════════════════════════════════ */
+var sects=['s0','s1','s2','s3','s4'],cur=-1;
+function showSect(id){
+  var el=document.getElementById(id);
+  if(!el)return;
+  el.style.display='block';
+  setTimeout(function(){
+    el.classList.add('vis');
+    holdSectionFollow(el,4200);
+    autoFollow(el,'start',120,false,true);
+    setTimeout(function(){animSect(id);},450);
+  },80);
+  cur=sects.indexOf(id);
+}
+
+function nxt(id){
+  playClickSound();
+  var prev=document.getElementById(sects[cur]);
+  if(prev){var nb=prev.querySelector('.nav');if(nb)nb.style.opacity='0.2';}
+  showSect(id);
+}
+
+/* ── Animations per scene ── */
+function animSect(id){
+  revealSectionText(id);
+  if(id==='s0'){
+    setIV('iv0','ivl0','ivt0',IV.s0[myRole]);
+    renderSolo('s0');
+    renderDream('s0');
+    twText(document.getElementById('tw0a'),'裂縫裡，有人在笑。',95,900,function(){
+      twText(document.getElementById('tw0b'),'是在等著我。',110,200,null);
+    });
+  }
+  if(id==='s1') animS1();
+  if(id==='s2'){
+    setIV('iv2','ivl2','ivt2',IV.s2[myRole]);
+    renderSolo('s2');
+    renderDream('s2');
+    staggerAir('#air2');
+    setTimeout(function(){buildChoice('c2','c2','ce2','ce2tag','ce2txt');},600);
+  }
+  if(id==='s3'){
+    setIV('iv3','ivl3','ivt3',IV.s3[myRole]);
+    renderSolo('s3');
+    renderDream('s3');
+    buildChoice('c3','c3','ce3','ce3tag','ce3txt');
+  }
+  if(id==='s4') animS4();
+}
+
+function animS1(){
+  var w1=document.getElementById('w1'),pw2=document.getElementById('pw2');
+  var w2=document.getElementById('w2'),pw3=document.getElementById('pw3');
+  var w3=document.getElementById('w3'),air1=document.getElementById('air1');
+  var pq=document.getElementById('pq'),iv1=document.getElementById('iv1');
+  var c1el=document.getElementById('c1');
+
+  setTimeout(function(){
+    fi(w1); twText(w1,'「一切都很好。」',72,50,function(){
+      setTimeout(function(){fi(pw2); setTimeout(function(){fi(w2);
+        twText(w2,'「不要多想。」',72,300,function(){
+          setTimeout(function(){fi(pw3); setTimeout(function(){fi(w3);
+            twText(w3,'「妳只是太敏感。」',72,300,function(){
+              setTimeout(function(){fi(air1);staggerAir('#air1');
+                setTimeout(function(){fi(pq);
+                  setTimeout(function(){
+                    setIV('iv1','ivl1','ivt1',IV.s1[myRole]);
+                    renderSolo('s1');
+                    renderDream('s1');
+                    buildChoice('c1','c1','ce1','ce1tag','ce1txt');
+                    fi(c1el);
+                  },700);
+                },700);
+              },400);
+            });
+          },300);},600);
+        });
+      },700);},800);
+    });
+  },600);
+}
+
+function animS4(){
+  var boss=document.getElementById('twboss'),after=document.getElementById('pbossafter');
+  var iv4=document.getElementById('iv4'),c4el=document.getElementById('c4');
+  document.getElementById('s4').style.animation='shake 0.4s ease';
+  setTimeout(function(){document.getElementById('s4').style.animation='';},450);
+  twText(boss,'「我都是為妳好。」',145,1000,function(){
+    setTimeout(function(){fi(after);
+      setTimeout(function(){
+        setIV('iv4','ivl4','ivt4',IV.s4[myRole]);
+        renderDream('s4');
+        buildChoice('c4','c4','ce4','ce4tag','ce4txt');
+        fi(c4el);
+      },600);
+    },500);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   CHOICES
+═══════════════════════════════════════════════ */
+function buildChoice(dataKey,nodeId,echoId,eTagId,eTxtId){
+  var data=CHOICES[dataKey][myRole];
+  var node=document.getElementById(nodeId);
+  if(!node)return;
+  var qEl=node.querySelector('.cq'); if(qEl) qEl.textContent=data.q;
+  var btns=node.querySelector('.cbtn-row'); if(!btns)return;
+  btns.innerHTML='';
+  ['a','b'].forEach(function(path){
+    var d=data[path];
+    var corruption=getChoiceCorruption(dataKey,path);
+    var btn=document.createElement('button');
+    btn.className='cbtn'+(corruption?' dream-shift':'');
+    btn.dataset.path=path;
+    btn.dataset.choice=dataKey;
+    btn.dataset.corrupt=corruption?'1':'0';
+    btn.innerHTML=renderChoiceText(d,corruption);
+    if(corruption){
+      btn.onmouseenter=btn.onfocus=function(){btn.classList.add('revealed');};
+      setTimeout(function(){btn.classList.add('revealed');},900+badChoices*220+liePressure*140);
+    }
+    btn.onclick=function(){playClickSound();makeChoice(dataKey,path,nodeId,echoId,eTagId,eTxtId);};
+    btns.appendChild(btn);
+  });
+  // show the node
+  node.style.opacity='1';
+  autoFollow(node);
+  setTimeout(function(){autoFollow(node);},520);
+}
+
+function renderChoiceText(d,corruption){
+  var note=d.note?'<span class="note">'+d.note+'</span>':'';
+  if(!corruption)return d.text+note;
+  return '<span class="truth">'+d.text+'</span><span class="lie">'+corruption.lie+'</span>'+note;
+}
+
+function getChoiceCorruption(dataKey,path){
+  var data=DREAM_LIES[dataKey]&&DREAM_LIES[dataKey][path];
+  if(!data)return null;
+  var chapter=parseInt(dataKey.replace('c',''),10)||1;
+  var pressure=badChoices+liePressure;
+  if(path==='a'&&(chapter>=2||pressure>=1))return data;
+  if(path==='b'&&pressure>=2)return data;
+  if(dataKey==='c4'&&pressure>=1)return data;
+  return null;
+}
+
+function makeChoice(dataKey,path,nodeId,echoId,eTagId,eTxtId){
+  var corruption=getChoiceCorruption(dataKey,path);
+  if(path==='b') awakening++;
+  if(path==='a') badChoices++;
+  if(corruption){
+    liePressure++;
+    corruptedChoices++;
+  }
+  if(dataKey==='c4') finalChoicePath=path;
+  scoreChoice(dataKey,path);
+  updateHud();
+  var rxKey=dataKey+path;
+  var data=CHOICES[dataKey][myRole];
+  var btns=document.getElementById(nodeId).querySelector('.cbtn-row');
+  if(btns){btns.style.transition='opacity 0.3s';btns.style.opacity='0';setTimeout(function(){btns.style.display='none';},320);}
+  // show echo
+  var ce=document.getElementById(echoId);
+  if(ce){
+    document.getElementById(eTagId).textContent=(path==='a'?'你——':'你——');
+    document.getElementById(eTagId).style.color=myColor;
+    document.getElementById(eTxtId).textContent=data[path].text;
+    ce.style.borderColor=myColor;
+    ce.style.display='block';
+    if(corruption){
+      document.getElementById(eTagId).textContent='夢替你說成：';
+      document.getElementById(eTxtId).innerHTML='<span class="echo-lie">'+corruption.lie+'</span><span class="echo-truth">你以為自己選的是：'+data[path].text+'</span>';
+      ce.classList.add('lied');
+    }else{
+      ce.classList.remove('lied');
+    }
+  }
+  // schedule next scene inside rx callback
+  var nextMap={'c1':'s2','c2':'s3','c3':'s4','c4':'reveal'};
+  var nextScene=nextMap[dataKey];
+  var consequence=CONSEQUENCES[myRole]&&CONSEQUENCES[myRole][rxKey];
+  if(corruption){
+    dreamMarks.push({kind:'lie',section:dataKey,label:'選項變質／'+dataKey.toUpperCase(),text:corruption.trace});
+  }
+  if(consequence){
+    dreamMarks.push({kind:'consequence',section:dataKey,label:'後果／'+myRole,text:consequence.alice});
+  }
+  showRX(consequence||RX[rxKey]||{sub:'',愛麗絲:'',貓:'',兔子:'',帽子先生:''},function(){
+    if(nextScene==='reveal') doReveal();
+    else{showSect(nextScene);setProg((sects.indexOf(nextScene)+1)/sects.length*0.8+0.1);}
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   REACTION OVERLAY
+═══════════════════════════════════════════════ */
+function showRX(data,cb){
+  rxCB=cb;
+  document.getElementById('rxSub').textContent=data.sub;
+  var grid=document.getElementById('rxGrid');
+  grid.innerHTML='';
+  grid.className='rx-grid';
+  if(data.act&&data.alice){
+    grid.classList.add('consequence');
+    [
+      {role:'你做了什麼',text:data.act,isYou:true},
+      {role:'愛麗絲因此',text:data.alice,isYou:false}
+    ].forEach(function(row){
+      var cell=document.createElement('div');
+      cell.className='rx-cell consequence'+(row.isYou?' is-you':'');
+      if(row.isYou) cell.style.borderColor=myColor;
+      cell.innerHTML='<div class="rx-role">'+row.role+'</div><div class="rx-text">'+row.text+'</div>';
+      grid.appendChild(cell);
+    });
+  }else{
+    ROLES.forEach(function(r){
+    var isYou=(r===myRole);
+    var cell=document.createElement('div');
+    cell.className='rx-cell '+CLS[r]+(isYou?' is-you':'');
+    if(isYou) cell.style.borderColor=myColor;
+    var pill=isYou?'<span class="you-pill" style="color:'+myColor+'">你的視角</span>':'';
+    cell.innerHTML='<div class="rx-role">'+r+'</div><div class="rx-text">'+(data[r]||'...')+pill+'</div>';
+    grid.appendChild(cell);
+  });
+  }
+  var o=document.getElementById('rxO');
+  o.classList.add('open');
+  setTimeout(function(){
+    var cells=grid.querySelectorAll('.rx-cell');
+    cells.forEach(function(c,i){setTimeout(function(){c.classList.add('in');},i*120);});
+  },200);
+  document.getElementById('rxClose').style.borderColor='rgba('+hr(myColor)+',0.28)';
+}
+document.getElementById('rxClose').onclick=function(){
+  playClickSound();
+  document.getElementById('rxO').classList.remove('open');
+  setTimeout(function(){
+    var cb=rxCB;
+    rxCB=null;
+    if(cb){
+      autoFollow._pending=null;
+      cb();
+    }else{
+      flushAutoFollow();
+    }
+  },350);
+};
+
+/* ═══════════════════════════════════════════════
+   REVEAL
+═══════════════════════════════════════════════ */
+function doReveal(){
+  setProg(1);
+  var ending=determineEnding();
+  if(ending.key==='awake') document.getElementById('edge').classList.add('heal');
+  setEndingBody(ending);
+  var rv=document.getElementById('reveal');
+  rv.style.display='block';
+  setTimeout(function(){rv.classList.add('show');autoFollow(rv,'start',120);},80);
+
+  var endLine=ending.line;
+  twText(document.getElementById('twend'),endLine,115,600,function(){
+    setTimeout(function(){
+      var fin=document.getElementById('fin');
+      fin.classList.add('show');
+      var lines=ending.lines;
+      twText(document.getElementById('tf1'),lines[0],110,300,function(){
+        twText(document.getElementById('tf2'),lines[1],100,200,function(){
+          twText(document.getElementById('tf3'),lines[2],110,400,function(){
+            setTimeout(buildFinalReveal,800);
+          });
+        });
+      });
+    },1600);
+  });
+}
+
+function buildFinalReveal(){
+  var wrap=document.getElementById('finalWrap');
+  var grid=document.getElementById('finalGrid');
+  var ending=determineEnding();
+  var finalData=ending.data;
+  ROLES.forEach(function(r,i){
+    var isYou=(r===myRole);
+    var cell=document.createElement('div');
+    cell.className='fc-cell '+CLS[r]+(isYou?' is-you':'');
+    if(isYou)cell.style.borderColor=myColor;
+    var pill=isYou?'<span style="display:block;font-family:var(--mono);font-size:9px;color:'+myColor+';letter-spacing:0.1em;margin-top:7px">← 你的視角</span>':'';
+    cell.innerHTML='<div class="fc-role">'+r+'</div><div class="fc-text">'+finalData[r]+pill+'</div>';
+    grid.appendChild(cell);
+    setTimeout(function(){cell.classList.add('in');},i*180);
+  });
+  var vEl=document.getElementById('verdict');
+  var vd=VERDICTS[myRole];
+  var dominant=getDominantPath();
+  vEl.innerHTML='<strong>'+ending.title+'</strong>你是「<span style="color:'+myColor+'">'+myRole+'</span>」。<br>'+vd[ending.verdictKey]+'<br><span style="font-size:12px;color:rgba(202,198,210,0.38)">這次夢境偏向：'+dominant.label+' · 壞選擇 '+badChoices+'/4 · 支撐 '+awakening+'/4</span>';
+  renderTrace(dominant,ending);
+  setTimeout(function(){wrap.style.opacity='1';},100);
+}
+
+/* ═══════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════ */
+function setEndingBody(ending){
+  var body=ending.body||[];
+  var coda=ending.coda||[];
+  ['endingBody1','endingBody2','endingBody3','endingBody4'].forEach(function(id,i){
+    var el=document.getElementById(id);
+    if(!el)return;
+    el.textContent=body[i]||'';
+    el.style.display=body[i]?'':'none';
+  });
+  ['endingCoda1','endingCoda2'].forEach(function(id,i){
+    var el=document.getElementById(id);
+    if(!el)return;
+    el.textContent=coda[i]||'';
+    el.style.display=coda[i]?'':'none';
+  });
+}
+
+function renderDream(sectionId){
+  var box=document.getElementById('dream-'+sectionId);
+  var items=EXPLORE[sectionId];
+  if(!box||!items||box.dataset.ready)return;
+  box.dataset.ready='1';
+  box.innerHTML='<div class="dream-head"><span class="dream-title">// 摸索夢境</span><span class="dream-count" id="dream-count-'+sectionId+'">0/'+items.length+' 已碰觸</span></div><p class="dream-rule">每章碰觸 2 個物件，會聽見一段隱藏回聲。</p><div class="dream-grid"></div><div class="dream-result" id="dream-result-'+sectionId+'"></div>';
+  var grid=box.querySelector('.dream-grid');
+  items.forEach(function(item){
+    var btn=document.createElement('button');
+    btn.className='dream-btn';
+    btn.type='button';
+    btn.textContent=item.label;
+    btn.onclick=function(){playClickSound();touchDream(sectionId,item,btn);};
+    grid.appendChild(btn);
+  });
+  setTimeout(function(){box.classList.add('show');fi(box);},120);
+}
+
+function renderSolo(sectionId){
+  var data=SOLO_LINES[myRole];
+  var box=document.getElementById('solo-'+sectionId);
+  if(!data||data.section!==sectionId||!box||box.dataset.ready)return;
+  box.dataset.ready='1';
+  box.dataset.idx='0';
+  box.innerHTML='<div class="solo-stage" style="background-image:url(\''+data.bg+'\')"><img class="solo-portrait" src="'+data.portrait+'" alt=""><div class="solo-dialogue"><div class="solo-kicker">'+data.title+'</div><div class="solo-line"></div></div></div><div class="solo-foot"><span class="solo-count"></span><button class="solo-btn" type="button">聽下去</button></div>';
+  box.querySelector('.solo-btn').onclick=function(){playClickSound();advanceSolo(box,data);};
+  setTimeout(function(){
+    box.classList.add('show');
+    fi(box);
+    advanceSolo(box,data);
+    if(audioEnabled) playRoleMusic(data.music);
+  },260);
+}
+
+function advanceSolo(box,data){
+  var idx=parseInt(box.dataset.idx||'0',10);
+  var line=box.querySelector('.solo-line');
+  var btn=box.querySelector('.solo-btn');
+  var count=box.querySelector('.solo-count');
+  if(idx>=data.beats.length){
+    btn.textContent='已聽完';
+    btn.disabled=true;
+    btn.style.opacity='0.42';
+    recordSolo(data);
+    return;
+  }
+  line.textContent=data.beats[idx];
+  autoFollow(box);
+  count.textContent=(idx+1)+'/'+data.beats.length;
+  box.dataset.idx=String(idx+1);
+  if(idx===data.beats.length-1){
+    btn.textContent='收進手記';
+  }
+  pathScore.witness++;
+  updateHud();
+}
+
+function recordSolo(data){
+  if(soloSeen[myRole])return;
+  soloSeen[myRole]=true;
+  dreamMarks.push({kind:'solo',section:data.section,label:data.mark,axis:'witness',text:data.trace});
+  pathScore.witness++;
+  updateHud();
+}
+
+function updateAudioButton(){
+  var btn=document.getElementById('audioBtn');
+  if(btn){
+    btn.textContent=musicEnabled?'音樂：開':'音樂：關';
+    btn.classList.toggle('off',!musicEnabled);
+  }
+}
+
+function startBackgroundMusic(){
+  if(!musicEnabled)return;
+  if(!backgroundMusic){
+    backgroundMusic=new Audio(AUDIO_FILES.bgm);
+    backgroundMusic.loop=true;
+    backgroundMusic.volume=0.34;
+    currentBgm=backgroundMusic;
+  }
+  backgroundMusic.play().catch(function(){});
+}
+
+function setMusicEnabled(enabled){
+  musicEnabled=!!enabled;
+  audioEnabled=musicEnabled;
+  updateAudioButton();
+  if(musicEnabled){
+    startBackgroundMusic();
+  }else if(backgroundMusic){
+    backgroundMusic.pause();
+  }
+}
+
+function playClickSound(){
+  var clickAudio=new Audio(AUDIO_FILES.click);
+  clickAudio.volume=0.55;
+  clickAudio.play().catch(function(){});
+}
+
+function playRoleMusic(src){
+  if(!musicEnabled)return;
+  startBackgroundMusic();
+}
+
+document.getElementById('audioBtn').onclick=function(){
+  playClickSound();
+  setMusicEnabled(!musicEnabled);
+};
+updateAudioButton();
+
+function touchDream(sectionId,item,btn){
+  var key=sectionId+':'+item.id;
+  var result=document.getElementById('dream-result-'+sectionId);
+  var count=document.getElementById('dream-count-'+sectionId);
+  var firstNewTouch=false;
+  var reread=false;
+  if(!dreamSeen[key]){
+    dreamSeen[key]=true;
+    firstNewTouch=true;
+    dreamMarks.push({kind:'object',section:sectionId,label:item.mark,axis:item.axis,text:item.text[myRole]});
+    pathScore[item.axis]=(pathScore[item.axis]||0)+1;
+  }else if(!dreamRereadSeen[key]){
+    dreamRereadSeen[key]=true;
+    reread=true;
+    liePressure++;
+    pathScore.face++;
+    dreamMarks.push({kind:'reread',section:sectionId,label:'第二次看見／'+item.mark,axis:'face',text:DREAM_REREADS[sectionId]});
+  }
+  btn.classList.add('seen');
+  if(result){
+    result.innerHTML='<strong>'+(reread?'第二次看見／':'')+item.mark+'</strong>'+(reread?DREAM_REREADS[sectionId]:item.text[myRole]);
+    result.style.display='block';
+    result.style.borderLeftColor=myColor;
+    autoFollow(result);
+  }
+  if(count){
+    var seen=EXPLORE[sectionId].filter(function(x){return dreamSeen[sectionId+':'+x.id];}).length;
+    count.textContent=seen+'/'+EXPLORE[sectionId].length+' 已碰觸';
+    if(firstNewTouch&&dreamMarks.length===1) dreamInterrupt('firstTouch');
+    if(firstNewTouch&&seen>=2&&!hiddenEchoSeen[sectionId]) revealHiddenEcho(sectionId);
+    updateHud();
+  }
+}
+
+function revealHiddenEcho(sectionId){
+  var data=DREAM_INTERRUPTS[sectionId];
+  if(!data)return;
+  hiddenEchoSeen[sectionId]=true;
+  pathScore.witness++;
+  dreamMarks.push({kind:'echo',section:sectionId,label:data.mark,axis:'witness',text:data.text});
+  var box=document.getElementById('dream-'+sectionId);
+  if(box) box.classList.add('echoed');
+  var count=document.getElementById('dream-count-'+sectionId);
+  if(count) count.textContent=count.textContent+' · 回聲已出現';
+  dreamInterrupt(sectionId);
+  updateHud();
+}
+
+function dreamInterrupt(id){
+  var data=DREAM_INTERRUPTS[id];
+  if(!data||interruptSeen[id])return;
+  interruptSeen[id]=true;
+  modalQueue.push(data);
+  showNextDreamInterrupt();
+}
+
+function showNextDreamInterrupt(){
+  if(modalOpen||!modalQueue.length)return;
+  modalOpen=true;
+  var data=modalQueue.shift();
+  var o=document.getElementById('dmO'),box=document.getElementById('dmBox');
+  document.getElementById('dmKicker').textContent=data.kicker;
+  document.getElementById('dmTitle').textContent=data.title;
+  document.getElementById('dmBody').textContent=data.body;
+  document.getElementById('dmClose').textContent=data.button;
+  box.className='dm-box '+(data.tone||'find');
+  o.classList.add('open');
+  o.setAttribute('aria-hidden','false');
+  document.body.classList.add('dream-jolt');
+  setTimeout(function(){document.body.classList.remove('dream-jolt');},380);
+}
+
+document.getElementById('dmClose').onclick=function(){
+  playClickSound();
+  var o=document.getElementById('dmO');
+  o.classList.remove('open');
+  o.setAttribute('aria-hidden','true');
+  setTimeout(function(){
+    modalOpen=false;
+    showNextDreamInterrupt();
+    if(!modalOpen) flushAutoFollow();
+  },260);
+};
+
+function scoreChoice(dataKey,path){
+  if(path==='a'){
+    pathScore.submit++;
+    pathScore.avoid++;
+  }else{
+    pathScore.witness++;
+    pathScore.face++;
+  }
+}
+
+function getDominantPath(){
+  var defs=[
+    {key:'face',label:'面對裂縫',text:'你不是把夢解開，而是開始承認它確實存在。'},
+    {key:'witness',label:'替感知作證',text:'你一路收集證據，像替某個被否認的自己留下紀錄。'},
+    {key:'avoid',label:'迴避重量',text:'你常常繞開太痛的東西，但你已經知道它們在哪裡。'},
+    {key:'submit',label:'順著夢走',text:'你讓夢推著你往前，直到那些熟悉的句子變得太熟悉。'}
+  ];
+  defs.sort(function(a,b){return (pathScore[b.key]||0)-(pathScore[a.key]||0);});
+  return defs[0];
+}
+
+function determineEnding(){
+  var swallowed=(finalChoicePath==='a'&&badChoices>=3)||badChoices>=4;
+  if(swallowed){
+    return {
+      key:'engulf',
+      title:'夢境吞噬',
+      verdictKey:'eg',
+      data:FINAL_ENGULF,
+      line:'「我知道。你是為我好。」',
+      body:['聲音沒有出來。','世界也沒有崩塌。','它只是往下沉。','沉到沒有人能分辨這是不是自己選的。'],
+      coda:['裂縫不再只是裂縫。','它變成房間的牆、地板，和所有人說話的方式。'],
+      lines:['裂縫張開。','它沒有發出聲音。','因為房間裡的人都已經學會安靜。']
+    };
+  }
+  if(finalChoicePath==='a'){
+    return {
+      key:'believe',
+      title:'相信結局',
+      verdictKey:'bl',
+      data:FINAL_BELIEVE,
+      line:'「我知道。我相信你。」',
+      body:['聲音很小。它學會替那句話讓路。','世界沒有崩塌。','因為它根本沒有被挑戰。','安靜很像安全。太像了。'],
+      coda:['裂縫沒有合上。','只是被一層很溫柔、很乾淨的布蓋住。'],
+      lines:['裂縫沒有合上。','只是被一層很溫柔的布蓋住。','愛麗絲站在那裡，看起來像沒事。']
+    };
+  }
+  if(awakening>=3){
+    return {
+      key:'awake',
+      title:'醒來結局',
+      verdictKey:'aw',
+      data:FINAL_AWAKE,
+      line:'「那不是愛。」',
+      body:['聲音很小。但說出來了。','世界崩塌。','沒有爆炸。沒有光。','只有安靜。'],
+      coda:['裂縫還在。但不再擴大了。','愛麗絲站在那裡。第一次，不需要有人告訴她該怎麼做。'],
+      lines:['裂縫還在。','但不再擴大了。','愛麗絲站在那裡。']
+    };
+  }
+  return {
+    key:'silence',
+    title:'沉默結局',
+    verdictKey:'hv',
+    data:FINAL_HEAVY,
+    line:'（沉默。）',
+    body:['聲音很小。小到還沒成形就被收回去。','世界沒有崩塌。','它只是把燈關暗。','安靜回來得太快，像什麼都沒有發生。'],
+    coda:['裂縫還在。它知道你知道它在。','愛麗絲站在那裡，等一個沒有人替她說出口的句子。'],
+    lines:['裂縫還在。','它知道你知道它在。','愛麗絲站在那裡。']
+  };
+}
+
+function showHud(){
+  var hud=document.getElementById('hud');
+  document.getElementById('hudRole').textContent='// '+myRole+' '+SYMS[myRole];
+  if(hud){
+    hud.classList.add('show');
+    hud.setAttribute('aria-hidden','false');
+  }
+  updateHud();
+}
+
+function updateHud(){
+  var hud=document.getElementById('hud');
+  if(!hud)return;
+  var objectCount=dreamMarks.filter(function(m){return m.kind==='object';}).length;
+  var echoCount=dreamMarks.filter(function(m){return m.kind==='echo';}).length;
+  document.getElementById('hudMarks').textContent=objectCount+'/15';
+  document.getElementById('hudEchoes').textContent=echoCount+'/5';
+  document.getElementById('hudPath').textContent=(objectCount+awakening>0)?getDominantPath().label:'未定';
+  var lieHud=document.getElementById('hudLie');
+  if(lieHud) lieHud.textContent=liePressure+corruptedChoices;
+  hud.style.borderColor='rgba('+hr(myColor)+','+(echoCount?0.24:0.08)+')';
+}
+
+function renderTrace(dominant,ending){
+  var box=document.getElementById('traceBox');
+  if(!box)return;
+  var objectMarks=dreamMarks.filter(function(m){return m.kind==='object';}).slice(-4);
+  var echoMarks=dreamMarks.filter(function(m){return m.kind==='echo';});
+  var soloMarks=dreamMarks.filter(function(m){return m.kind==='solo';});
+  var consequenceMarks=dreamMarks.filter(function(m){return m.kind==='consequence';}).slice(-4);
+  var rereadMarks=dreamMarks.filter(function(m){return m.kind==='reread';}).slice(-3);
+  var lieMarks=dreamMarks.filter(function(m){return m.kind==='lie';}).slice(-4);
+  var marks=objectMarks.concat(rereadMarks).concat(echoMarks).concat(soloMarks).concat(consequenceMarks).concat(lieMarks);
+  var list=marks.length?marks.map(function(m){
+    var cls=(m.kind==='echo'||m.kind==='solo'||m.kind==='consequence'||m.kind==='lie'||m.kind==='reread')?'trace-item echo':'trace-item';
+    return '<div class="'+cls+'"><b>'+m.label+'</b><br>'+m.text+'</div>';
+  }).join(''):'<div class="trace-item"><b>沒有碰觸任何物件</b><br>這次你幾乎只是穿過夢。夢仍然記得你的沉默。</div>';
+  var objectCount=dreamMarks.filter(function(m){return m.kind==='object';}).length;
+  var echoCount=echoMarks.length;
+  var carry=ending.key==='awake'?'你帶著這些痕跡醒來。':(ending.key==='engulf'?'夢把這些痕跡一起吞下去。':'你帶著這些痕跡繼續往下沉。');
+  box.innerHTML='<div class="trace-title">// 夢境手記 · '+ending.title+' · 觸碰 '+objectCount+'/15 · 回聲 '+echoCount+'/5 · 單人線 '+soloMarks.length+'/1 · 後果 '+consequenceMarks.length+'/4</div><div class="trace-list">'+list+'</div><div class="trace-path">'+dominant.text+' '+carry+'</div>';
+}
+
+function setIV(id,lblId,txtId,text){
+  var el=document.getElementById(id),lbl=document.getElementById(lblId),txt=document.getElementById(txtId);
+  if(!el||!lbl||!txt)return;
+  lbl.textContent=myRole;lbl.style.color=myColor;
+  txt.textContent=text;
+  el.style.borderLeftColor=myColor;
+  el.style.removeProperty('display');
+  setTimeout(function(){el.classList.add('show');autoFollow(el);},150);
+}
+
+function revealSectionText(id){
+  var section=document.getElementById(id);
+  if(!section)return 0;
+  var chh=section.querySelector('.chh');
+  if(chh)setTimeout(function(){chh.classList.add('shown');autoFollow(chh,'nearest');},120);
+  var t=260;
+  var ps=section.querySelectorAll('.prose p');
+  ps.forEach(function(p){
+    if(p.id&&p.id.indexOf('tw')===0)return;
+    var parent=p.closest('.fd');
+    if(parent&&!parent.classList.contains('in'))return;
+    var isBreath=(p.innerHTML.trim()==='&nbsp;'||p.textContent.trim()==='');
+    setTimeout(function(){p.classList.add('li');autoFollow(p,'nearest');},t);
+    t+=isBreath?520:330;
+  });
+  return t;
+}
+
+function revealBlockText(el,baseDelay){
+  if(!el)return;
+  var ps=el.querySelectorAll('.prose p');
+  ps.forEach(function(p,i){
+    setTimeout(function(){p.classList.add('li');autoFollow(p,'nearest');},(baseDelay||0)+i*330);
+  });
+}
+
+function isOverlayBlockingFollow(){
+  var rx=document.getElementById('rxO');
+  var dm=document.getElementById('dmO');
+  return modalOpen || (rx&&rx.classList.contains('open')) || (dm&&dm.classList.contains('open'));
+}
+function flushAutoFollow(){
+  if(!autoFollow._pending || isOverlayBlockingFollow())return;
+  var next=autoFollow._pending;
+  autoFollow._pending=null;
+  autoFollow(next.el,next.block,next.delay,true,next.major);
+}
+function holdSectionFollow(section,duration){
+  autoFollow._sectionHold=section;
+  autoFollow._sectionHoldUntil=Date.now()+(duration||1600);
+}
+function isSectionFollowHeld(el,major){
+  if(major||!autoFollow._sectionHold)return false;
+  if(Date.now()>autoFollow._sectionHoldUntil)return false;
+  return autoFollow._sectionHold.contains(el);
+}
+function autoFollow(el,block,delay,force,major){
+  if(!el)return;
+  if(!force&&isSectionFollowHeld(el,major))return;
+  clearTimeout(autoFollow._t);
+  var req={el:el,block:block||'center',delay:(delay==null?90:delay),major:!!major};
+  if(!force&&isOverlayBlockingFollow()){
+    autoFollow._pending=req;
+    return;
+  }
+  autoFollow._pending=null;
+  autoFollow._t=setTimeout(function(){
+    if(!force&&isSectionFollowHeld(req.el,req.major))return;
+    if(!force&&isOverlayBlockingFollow()){
+      autoFollow._pending=req;
+      return;
+    }
+    try{walkScrollTo(req.el,req.block,req.major?'approach':null);}catch(e){}
+  },req.delay);
+}
+
+function walkScrollTo(el,block,mode){
+  if(!el)return;
+  if(walkScrollTo._raf)cancelAnimationFrame(walkScrollTo._raf);
+  if(walkScrollTo._pause)clearTimeout(walkScrollTo._pause);
+  var rect=el.getBoundingClientRect();
+  var viewH=window.innerHeight||document.documentElement.clientHeight||720;
+  var doc=document.documentElement;
+  var maxY=Math.max(0,doc.scrollHeight-viewH);
+  var start=window.pageYOffset||doc.scrollTop||0;
+  var target=start+rect.top;
+  if(block==='center')target-=Math.max(0,(viewH-rect.height)/2);
+  else if(block==='nearest'){
+    var pad=92;
+    if(rect.top>=pad&&rect.bottom<=viewH-pad)return;
+    target=start+rect.top-pad;
+  }else{
+    target-=56;
+  }
+  target=Math.max(0,Math.min(maxY,target));
+  var dist=target-start;
+  if(Math.abs(dist)<6)return;
+  var pollution=Math.min(1,(typeof liePressure==='number'?liePressure:0)/6);
+  var kind=mode||(Math.abs(dist)>720?'walk':'approach');
+  if(pollution>0.55&&kind!=='approach')kind='stumble';
+  var steps=kind==='stumble'?[0.34,0.58,0.86,1]:kind==='walk'?[0.28,0.55,0.78,1]:[0.5,0.82,1];
+  var pauses=kind==='stumble'?[86,132,74,0]:kind==='walk'?[92,78,54,0]:[58,44,0];
+  var dur=kind==='stumble'?240:kind==='walk'?300:220;
+  var i=0,last=start;
+  function ease(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+  function segment(){
+    var end=start+dist*steps[i];
+    if(kind==='stumble'&&i===1)end+=dist>0?18:-18;
+    var from=last;
+    var began=performance.now();
+    function frame(now){
+      var t=Math.min(1,(now-began)/dur);
+      window.scrollTo(0,from+(end-from)*ease(t));
+      if(t<1){
+        walkScrollTo._raf=requestAnimationFrame(frame);
+      }else{
+        last=end;
+        i++;
+        if(i<steps.length)walkScrollTo._pause=setTimeout(segment,pauses[i-1]);
+      }
+    }
+    walkScrollTo._raf=requestAnimationFrame(frame);
+  }
+  segment();
+}
+
+function fi(el){
+  if(!el)return;
+  el.style.opacity='1';
+  el.classList.add('in');
+  revealBlockText(el,120);
+  autoFollow(el);
+}
+function staggerAir(sel){
+  var ps=document.querySelectorAll(sel+' p');
+  ps.forEach(function(p,i){setTimeout(function(){p.classList.add('in');autoFollow(p,'nearest');},i*460);});
+}
+function twText(el,text,speed,delay,done){
+  if(!el)return;
+  el.innerHTML='';
+  setTimeout(function(){
+    autoFollow(el);
+    var c=document.createElement('span');c.className='twc';c.textContent='|';c.style.color=myColor;
+    el.appendChild(c);var i=0;
+    var iv=setInterval(function(){
+      if(i<text.length){c.insertAdjacentText('beforebegin',text[i]);i++;}
+      else{clearInterval(iv);setTimeout(function(){c.remove();el.classList.add('li');autoFollow(el);if(done)done();},320);}
+    },Math.min(speed,78));
+  },delay);
+}
+function setProg(f){document.getElementById('prog').style.width=(f*100)+'%';}
+function hr(hex){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return r+','+g+','+b;}
+
+window.onload=function(){document.getElementById('prog').style.width='0%';};
+</script>
+</body>
+</html>
